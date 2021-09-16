@@ -101,6 +101,7 @@ OTHER_HELP = """
 """
 
 
+#help command
 @client.command(name="help", description="List commands")
 async def command_help(ctx):
     "Main help command for the bot"
