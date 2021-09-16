@@ -1,0 +1,9 @@
+
+discord==1.7.3
+enhanced-dpy==1.7.3.7.post1
+pafy==0.5.5
+bs4==0.0.1
+regex==2021.8.28
+replit==3.0.0
+requests==2.26.0
+urllib3==1.26.4
