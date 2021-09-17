@@ -5,7 +5,9 @@ from discord import member
 from main import __version__
 
 from discord.ext import commands
+import discord_slash
 from discord.ext.commands.core import command
+
 
 #this is very important for creating a cog
 class Meta(commands.Cog):

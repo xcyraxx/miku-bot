@@ -18,7 +18,6 @@ from bs4 import BeautifulSoup
 import requests
 import pafy
 
-EMBED_COLOR = os.environ.get("EMBED_COLOR")
 PREFIX = os.environ.get("PREFIX")
 
 
@@ -46,18 +45,18 @@ class Music(commands.Cog):
 
         if ctx.author.voice is None:
             await ctx.send("You're not connected to a Voice Channel.")
-
-        voice_channel = ctx.author.voice.channel
-
-        if ctx.voice_client is None:
-            gif = await ctx.send("https://c.tenor.com/_BOcFSneKjwAAAAM/tenten-summoning.gif")
-            await asyncio.sleep(1)
-            await gif.delete()
-            await voice_channel.connect()
-            await ctx.guild.change_voice_state(channel=voice_channel, self_deaf=True)
-            await ctx.send("Hi there!")
         else:
-            await ctx.voice_client.move_to(voice_channel)
+            voice_channel = ctx.author.voice.channel
+
+            if ctx.voice_client is None:
+                gif = await ctx.send("https://c.tenor.com/_BOcFSneKjwAAAAM/tenten-summoning.gif")
+                await asyncio.sleep(1)
+                await gif.delete()
+                await voice_channel.connect()
+                await ctx.guild.change_voice_state(channel=voice_channel, self_deaf=True)
+                await ctx.send("Hi there!")
+            else:
+                await ctx.voice_client.move_to(voice_channel)
 
     @commands.command(name="leave", aliases=("exit", "kill"), description="Disconnects the bot from channel.")
     async def command_leave(self, ctx):
