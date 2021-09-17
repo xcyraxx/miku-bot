@@ -53,7 +53,6 @@ class Music(commands.Cog):
                 await asyncio.sleep(1)
                 await gif.delete()
                 await voice_channel.connect()
-                await ctx.guild.change_voice_state(channel=voice_channel, self_deaf=True)
                 await ctx.send("Hi there!")
             else:
                 await ctx.voice_client.move_to(voice_channel)
@@ -84,7 +83,6 @@ class Music(commands.Cog):
             if not ctx.voice_client:
                 voice_channel = ctx.author.voice.channel
                 voice = await voice_channel.connect()
-                await ctx.guild.change_voice_state(channel=voice_channel, self_deaf=True)
             else:
                 voice = ctx.voice_client
 
