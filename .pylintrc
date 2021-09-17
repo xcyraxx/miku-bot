@@ -1,0 +1,9 @@
+[MESSAGES CONTROL]
+disable=
+    too-many-instance-attributes,
+    redefined-builtin,
+    invalid-name,
+    unused-argument,
+    global-variable-undefined,
+    line-too-long,
+    fixme
