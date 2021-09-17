@@ -1,8 +1,0 @@
-{
-    "name": "miku",
-    "description": "savio sux",
-    "scripts": {
-      "start": "python ./main.py"
-    },
-    "license": "ISC"
-  }
