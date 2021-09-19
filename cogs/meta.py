@@ -2,10 +2,7 @@ from os import name, terminal_size
 import discord
 import datetime, time
 from discord import member 
-from main import __version__
-
 from discord.ext import commands
-import discord_slash
 from discord.ext.commands.core import command
 
 
@@ -47,11 +44,11 @@ class Meta(commands.Cog):
         uptime = str(datetime.timedelta(seconds=int(round(time.time()-startTime))))
         info.add_field(name="Library used", value="Enhanced Discord.py v1.7.3.7.post1", inline=False)
         info.add_field(name="Python Version", value="Python 3.9.6", inline=True)
-        info.add_field(name="Code Lines written", value="394")
+        info.add_field(name="Code Lines written", value="492")
         info.add_field(name="Uptime", value=uptime, inline=False)
         info.add_field(name="Top Role in this Server" ,value=user.top_role)
-        info.add_field(name="Team? ig?", value="Adil#5514 Skyascii#1860 marshadow#7063", inline=False)
-        info.add_field(name="Version", value=f"{__version__}")
+        info.add_field(name="Dev Team", value="Adil#5514 Skyascii#1860 marshadow#7063", inline=False)
+        info.add_field(name="Version", value=f"1.2.0")
         info.set_footer(text="Avatar drawn by marshadow#7063")
         info.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=info)
