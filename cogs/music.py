@@ -85,12 +85,9 @@ class Music(commands.Cog):
                 voice = ctx.voice_client
 
             searching = discord.Embed(
-                title="Searching", description=f"Now searching for `{arg}`", color=discord.Color.from_rgb(3, 252, 252))
+                title="Searching", description=f"{arg}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
             searching.set_thumbnail(url=self.client.user.avatar_url)
-
-            searching.set_footer(
-                text=f"Requested By {ctx.author.display_name}")
 
             serchbed = await ctx.send(embed=searching)
 
@@ -114,8 +111,9 @@ class Music(commands.Cog):
             url = f"http://www.youtube.com/watch?v={search_results[1]}"
 
             vid = pafy.new(url)
-            title = vid.title
+            brr = vid.title
             thumb_url = vid.thumb
+            dur = vid.duration
 
             with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
                 if valid == True:
@@ -124,6 +122,7 @@ class Music(commands.Cog):
                     url = url3
                     thumb_url = video.thumb
                     brr = video.title
+                    dur = video.duration
 
                 info = ydl.extract_info(url, download=False)
                 url2 = info["formats"][0]["url"]
@@ -131,9 +130,10 @@ class Music(commands.Cog):
                 source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
 
                 playing = discord.Embed(
-                    title="Playing", description=f"🎶Now playing `{brr}`", color=discord.Color.from_rgb(3, 252, 252))
+                    title="Now Playing", description=f"🎶[{brr}]({url})\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
                 playing.set_thumbnail(url=thumb_url)
+                playing.url
 
                 voice.play(source)
 
