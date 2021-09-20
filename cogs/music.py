@@ -84,60 +84,63 @@ class Music(commands.Cog):
             else:
                 voice = ctx.voice_client
 
-            searching = discord.Embed(
-                title="Searching", description=f"{arg}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+            if ctx.voice_client.is_playing():
+                await ctx.send("Please wait till the current song gets over or Stop it. Queue Function coming soon (savio plez)")
+            else:
+                searching = discord.Embed(
+                    title="Searching", description=f"{arg}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
-            searching.set_thumbnail(url=self.client.user.avatar_url)
+                searching.set_thumbnail(url=self.client.user.avatar_url)
 
-            serchbed = await ctx.send(embed=searching)
+                serchbed = await ctx.send(embed=searching)
 
-            valid = validators.url(arg)
-            FFMPEG_OPTIONS = {
-                "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
+                valid = validators.url(arg)
+                FFMPEG_OPTIONS = {
+                    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
 
-            YDL_OPTIONS = {}
+                YDL_OPTIONS = {}
 
-            query_string = urllib.parse.urlencode({
-                "search_query": arg
-            })
+                query_string = urllib.parse.urlencode({
+                    "search_query": arg
+                })
 
-            htm_content = urllib.request.urlopen(
-                "https://www.youtube.com/results?" + query_string
-            )
+                htm_content = urllib.request.urlopen(
+                    "https://www.youtube.com/results?" + query_string
+                )
 
-            search_results = re.findall(
-                r"watch\?v=(\S{11})", htm_content.read().decode())
+                search_results = re.findall(
+                    r"watch\?v=(\S{11})", htm_content.read().decode())
 
-            url = f"http://www.youtube.com/watch?v={search_results[1]}"
+                url = f"http://www.youtube.com/watch?v={search_results[1]}"
 
-            vid = pafy.new(url)
-            brr = vid.title
-            thumb_url = vid.thumb
-            dur = vid.duration
+                vid = pafy.new(url)
+                brr = vid.title
+                thumb_url = vid.thumb
+                dur = vid.duration
 
-            with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-                if valid == True:
-                    url3 = arg
-                    video = pafy.new(url3)
-                    url = url3
-                    thumb_url = video.thumb
-                    brr = video.title
-                    dur = video.duration
+                with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+                    if valid == True:
+                        url3 = arg
+                        video = pafy.new(url3)
+                        url = url3
+                        thumb_url = video.thumb
+                        brr = video.title
+                        dur = video.duration
 
-                info = ydl.extract_info(url, download=False)
-                url2 = info["formats"][0]["url"]
+                    info = ydl.extract_info(url, download=False)
+                    url2 = info["formats"][0]["url"]
 
-                source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
+                    source = await discord.FFmpegOpusAudio.from_probe(url2, **FFMPEG_OPTIONS)
 
-                playing = discord.Embed(
-                    title="Now Playing", description=f"🎶[{brr}]({url})\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+                    playing = discord.Embed(
+                        title="Now Playing", description=f"🎶[{brr}]({url})\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
-                playing.set_thumbnail(url=thumb_url)
-                playing.url
+                    playing.set_thumbnail(url=thumb_url)
+                    playing.url
 
-                voice.play(source)
+                    voice.play(source)
 
-                await serchbed.edit(embed=playing)
+                    await serchbed.edit(embed=playing)
 
         else:
             await ctx.send(f"Provide a name or a link to play the song. Usage: `{PREFIX}play song name`")
