@@ -14,6 +14,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Cog
 import youtube_dl
+import validators
 from bs4 import BeautifulSoup
 import requests
 import pafy
@@ -77,9 +78,6 @@ class Music(commands.Cog):
         # TODO: FIX : Too many local variables
 
         if arg:
-            urls = re.findall(
-                "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", arg.lower())
-
             if not ctx.voice_client:
                 voice_channel = ctx.author.voice.channel
                 voice = await voice_channel.connect()
@@ -96,6 +94,7 @@ class Music(commands.Cog):
 
             serchbed = await ctx.send(embed=searching)
 
+            valid = validators.url(arg)
             FFMPEG_OPTIONS = {
                 "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
 
@@ -114,17 +113,12 @@ class Music(commands.Cog):
 
             url = f"http://www.youtube.com/watch?v={search_results[1]}"
 
-            req = requests.get(url)
-            soup = BeautifulSoup(req.text, "html.parser")
-            title = soup.find("meta", property="og:title")
-            brr = title["content"] if title else "No meta title given"
-
-            thumb_url = f"https://img.youtube.com/vi/{search_results[1]}/maxresdefault.jpg"
+            vid = pafy.new(url)
+            title = vid.title
+            thumb_url = vid.thumb
 
             with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-                if arg in urls:
-                    print(arg)
-
+                if valid == True:
                     url3 = arg
                     video = pafy.new(url3)
                     url = url3
