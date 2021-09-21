@@ -1,30 +1,32 @@
 from os import name, terminal_size
 import discord
-import datetime, time
-from discord import member 
+import datetime
+import time
+from discord import member
 from discord.ext import commands
 from discord.ext.commands.core import command
 
 
-#this is very important for creating a cog
+# this is very important for creating a cog
 class Meta(commands.Cog):
     def __init__(self, client):
         self.client = client
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Meta up!') 
-        global startTime 
+        print(f"Meta up!")
+        global startTime
         startTime = time.time()
 
-    #create a command in the cog
-    @commands.command(name='Uptime')
-    async def _uptime(self,ctx):
+    # create a command in the cog
+    @commands.command(name="Uptime")
+    async def _uptime(self, ctx):
 
-        # what this is doing is creating a variable called 'uptime' and assigning it
+        # what this is doing is creating a variable called "uptime" and assigning it
         # a string value based off calling a time.time() snapshot now, and subtracting
         # the global from earlier
-        uptime = str(datetime.timedelta(seconds=int(round(time.time()-startTime))))
+        uptime = str(datetime.timedelta(
+            seconds=int(round(time.time()-startTime))))
         await ctx.send(uptime)
 
     @commands.command(name="botinfo", aliases=("bi", ))
@@ -36,22 +38,28 @@ class Meta(commands.Cog):
             title="Bot Info",
             color=discord.Color.from_rgb(3, 252, 252)
         )
-        info.set_author(name=f"{user.display_name}#{user.discriminator}", icon_url=user.avatar_url)
+        info.set_author(
+            name=f"{user.display_name}#{user.discriminator}", icon_url=user.avatar_url)
         info.add_field(name="ID", value=self.client.user.id, inline=True)
         info.add_field(name="Created on",
-                    value=user.created_at.strftime("%a, %b %d, %Y %I:%M %p"))
+                       value=user.created_at.strftime("%a, %b %d, %Y %I:%M %p"))
         #info.add_field(name="Joined on", value=member.joined_at.strftime("%a, %b %d, %Y %I:%M %p"))
-        uptime = str(datetime.timedelta(seconds=int(round(time.time()-startTime))))
-        info.add_field(name="Library used", value="Enhanced Discord.py v1.7.3.7.post1", inline=False)
-        info.add_field(name="Python Version", value="Python 3.9.6", inline=True)
+        uptime = str(datetime.timedelta(
+            seconds=int(round(time.time()-startTime))))
+        info.add_field(name="Library used",
+                       value="Enhanced Discord.py v1.7.3.7.post1", inline=False)
+        info.add_field(name="Python Version",
+                       value="Python 3.9.6", inline=True)
         info.add_field(name="Code Lines written", value="492")
         info.add_field(name="Uptime", value=uptime, inline=False)
-        info.add_field(name="Top Role in this Server" ,value=user.top_role)
-        info.add_field(name="Dev Team", value="Adil#5514 Skyascii#1860 marshadow#7063", inline=False)
+        info.add_field(name="Top Role in this Server", value=user.top_role)
+        info.add_field(
+            name="Dev Team", value="Adil#5514 Skyascii#1860 marshadow#7063", inline=False)
         info.add_field(name="Version", value=f"1.2.0")
         info.set_footer(text="Avatar drawn by marshadow#7063")
         info.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=info)
 
+
 def setup(bot):
-    bot.add_cog(Meta(bot))  
+    bot.add_cog(Meta(bot))

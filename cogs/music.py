@@ -182,7 +182,7 @@ class Music(commands.Cog):
         queue = []
         for i in queue:
             print(i)
-    
+
 
 def setup(bot):
     "Setup command for the bot"

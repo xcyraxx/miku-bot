@@ -106,7 +106,7 @@ OTHER_HELP = """
 """
 
 
-#help command
+# help command
 # @client.command(name="help", description="List commands")
 # async def command_help(ctx):
 #     "Main help command for the bot"
@@ -125,7 +125,7 @@ OTHER_HELP = """
     description="Displays the commands and their descriptions.",
     guild_ids=[__GUILD_ID__]
 )
-async def help(ctx:SlashContext):
+async def help(ctx: SlashContext):
     bot_help = discord.Embed(
         title="Miku Help",
         description=MAIN_HELP,
