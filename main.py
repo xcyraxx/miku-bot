@@ -6,15 +6,12 @@ Main contributors:
     Assassin
 """
 
-from logging import info
 import os
 import discord
 from discord.enums import Status
 from discord.ext import commands
 from dotenv import load_dotenv
-from calendar import timegm
 from discord_slash import SlashCommand, SlashContext
-from discord_slash.utils.manage_commands import create_choice, create_option
 
 
 load_dotenv()
@@ -32,6 +29,8 @@ intents.members = True
 
 
 async def determine_prefix(bot, message):
+    "Determine prefix for the bot"
+
     guild = message.guild
     if guild:
         return custom_prefixes.get(guild.id, default_prefixes)
@@ -126,6 +125,8 @@ OTHER_HELP = """
     guild_ids=[__GUILD_ID__]
 )
 async def help(ctx: SlashContext):
+    "Help commands for the bot"
+
     bot_help = discord.Embed(
         title="Miku Help",
         description=MAIN_HELP,

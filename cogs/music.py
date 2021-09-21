@@ -15,8 +15,6 @@ from discord.ext import commands
 from discord.ext.commands import Cog
 import youtube_dl
 import validators
-from bs4 import BeautifulSoup
-import requests
 import pafy
 
 PREFIX = os.environ.get("PREFIX")
@@ -119,7 +117,7 @@ class Music(commands.Cog):
                 dur = vid.duration
 
                 with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-                    if valid == True:
+                    if valid:
                         url3 = arg
                         video = pafy.new(url3)
                         url = url3
@@ -136,7 +134,6 @@ class Music(commands.Cog):
                         title="Now Playing", description=f"🎶[{brr}]({url})\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
                     playing.set_thumbnail(url=thumb_url)
-                    playing.url
 
                     voice.play(source)
 
@@ -179,6 +176,7 @@ class Music(commands.Cog):
     @commands.command(name="queue", description="Displays the current queue.")
     async def command_queue(self, ctx):
         "Displays current song queue/list"
+
         queue = []
         for i in queue:
             print(i)
@@ -186,4 +184,5 @@ class Music(commands.Cog):
 
 def setup(bot):
     "Setup command for the bot"
+
     bot.add_cog(Music(bot))

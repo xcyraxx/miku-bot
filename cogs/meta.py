@@ -1,20 +1,27 @@
-from os import name, terminal_size
-import discord
+"""
+Meta commands for the Miku bot
+"""
+
 import datetime
 import time
-from discord import member
+import discord
 from discord.ext import commands
-from discord.ext.commands.core import command
 
 
 # this is very important for creating a cog
 class Meta(commands.Cog):
+    "Python class that handles all meta commands"
+
     def __init__(self, client):
+        "Init function for Discord client"
+
         self.client = client
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"Meta up!")
+        "Function to determine what commands are to be if bot is connected to Discord"
+
+        print("Meta up!")
         global startTime
         startTime = time.time()
 
@@ -55,11 +62,13 @@ class Meta(commands.Cog):
         info.add_field(name="Top Role in this Server", value=user.top_role)
         info.add_field(
             name="Dev Team", value="Adil#5514 Skyascii#1860 marshadow#7063", inline=False)
-        info.add_field(name="Version", value=f"1.2.0")
+        info.add_field(name="Version", value='1.2.0')
         info.set_footer(text="Avatar drawn by marshadow#7063")
         info.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=info)
 
 
 def setup(bot):
+    "Setup command for the bot"
+
     bot.add_cog(Meta(bot))
