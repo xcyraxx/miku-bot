@@ -39,6 +39,16 @@ class Meta(commands.Cog):
     @commands.command(name="botinfo", aliases=("bi", ))
     async def command_botinfo(self, ctx):
         "Returns information about the bot"
+
+        SKYASCII = ctx.guild.get_member(614053918867062785)
+        ADIL = ctx.guild.get_member(613789929134227465)
+        MARSH = ctx.guild.get_member(614058101347188737)
+
+        skyascii = f"{SKYASCII.name}#{SKYASCII.discriminator}"
+        adil = f"{ADIL.name}#{ADIL.discriminator}"
+        marsh = f"{MARSH.name}#{MARSH.discriminator}"
+
+
         user = ctx.guild.get_member(886914091657101313)
         perm_list = [perm[0] for perm in user.guild_permissions if perm[1]]
         info = discord.Embed(
@@ -61,7 +71,7 @@ class Meta(commands.Cog):
         info.add_field(name="Uptime", value=uptime, inline=False)
         info.add_field(name="Top Role in this Server", value=user.top_role)
         info.add_field(
-            name="Dev Team", value="Adil#5514 Skyascii#1860 marshadow#7063", inline=False)
+            name="Dev Team", value=f"{skyascii}, {adil}, {marsh}", inline=False)
         info.add_field(name="Version", value='1.2.0')
         info.set_footer(text="Avatar drawn by marshadow#7063")
         info.set_thumbnail(url=user.avatar_url)
