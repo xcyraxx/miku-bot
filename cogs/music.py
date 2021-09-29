@@ -5,6 +5,7 @@ Main contributors:
     @savioxavier, @xcyraxx, @UndriveAssassin
 """
 
+from typing import Text
 import urllib.request
 import urllib.parse
 import asyncio
@@ -15,8 +16,10 @@ from discord.ext import commands
 from discord.ext.commands import Cog
 import youtube_dl
 import validators
+from discord_slash import SlashCommand, cog_ext, SlashContext
 import pafy
 
+__GUILD_ID__ = [846609621429780520]
 PREFIX = os.environ.get("PREFIX")
 
 
@@ -38,7 +41,7 @@ class Music(commands.Cog):
 
         print("Music up!")
 
-    @commands.command(name="summon", aliases=("join", "kuchiyose"), description="Connects the bot to voice channel.")
+    @cog_ext.cog_slash(name="join", description="Join your current voice channel", guild_ids=__GUILD_ID__)
     async def command_join(self, ctx):
         "Join a Voice Channel if the author is present in one, else raise error if they aren't"
 
@@ -48,15 +51,12 @@ class Music(commands.Cog):
             voice_channel = ctx.author.voice.channel
 
             if ctx.voice_client is None:
-                gif = await ctx.send("https://c.tenor.com/_BOcFSneKjwAAAAM/tenten-summoning.gif")
-                await asyncio.sleep(1)
-                await gif.delete()
                 await voice_channel.connect()
                 await ctx.send("Hi there!")
             else:
                 await ctx.voice_client.move_to(voice_channel)
 
-    @commands.command(name="leave", aliases=("exit", "kill"), description="Disconnects the bot from channel.")
+    @cog_ext.cog_slash(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
     async def command_leave(self, ctx):
         "Leave a voice if the bot is connected to a Voice Channel, else raise error if it isn't"
 
@@ -66,8 +66,8 @@ class Music(commands.Cog):
         else:
             await ctx.send("I'm not connected to Voice Channel.")
 
-    @commands.command(name="play", description="Play any song by name. Usage: >>play song name")
-    async def command_play(self, ctx, *, arg=None):
+    @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
+    async def command_play(self, ctx: SlashContext, arg: str):
         """Play a YouTube video using the youtube_dl library
 
         Args:
@@ -142,8 +142,8 @@ class Music(commands.Cog):
         else:
             await ctx.send(f"Provide a name or a link to play the song. Usage: `{PREFIX}play song name`")
 
-    @commands.command()
-    async def pause(self, ctx):
+    @cog_ext.cog_slash(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
+    async def _pause(self, ctx):
         "Pause music"
 
         if ctx.voice_client:
@@ -152,8 +152,8 @@ class Music(commands.Cog):
         else:
             await ctx.send("There isn't anything to pause.")
 
-    @commands.command()
-    async def resume(self, ctx):
+    @cog_ext.cog_slash(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
+    async def _resume(self, ctx):
         "Resume music"
 
         if ctx.voice_client:
@@ -162,8 +162,8 @@ class Music(commands.Cog):
         else:
             await ctx.send("There isn't anything to resume.")
 
-    @commands.command()
-    async def stop(self, ctx):
+    @cog_ext.cog_slash(name="stop", description="Stop the current song.", guild_ids=__GUILD_ID__)
+    async def _stop(self, ctx):
         "Stop music"
 
         if ctx.voice_client:
