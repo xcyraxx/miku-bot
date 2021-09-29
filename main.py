@@ -43,6 +43,16 @@ async def determine_prefix(bot, message):
     else:
         return default_prefixes
 
+print("""
+
+███╗░░░███╗██╗██╗░░██╗██╗░░░██╗░░░░░░██████╗░░█████╗░████████╗
+████╗░████║██║██║░██╔╝██║░░░██║░░░░░░██╔══██╗██╔══██╗╚══██╔══╝
+██╔████╔██║██║█████═╝░██║░░░██║█████╗██████╦╝██║░░██║░░░██║░░░
+██║╚██╔╝██║██║██╔═██╗░██║░░░██║╚════╝██╔══██╗██║░░██║░░░██║░░░
+██║░╚═╝░██║██║██║░╚██╗╚██████╔╝░░░░░░██████╦╝╚█████╔╝░░░██║░░░
+╚═╝░░░░░╚═╝╚═╝╚═╝░░╚═╝░╚═════╝░░░░░░░╚═════╝░░╚════╝░░░░╚═╝░░░
+""")
+
 activity = discord.Game(name=">>help")
 client = commands.Bot(command_prefix=determine_prefix,
                       case_insensitive=True,
@@ -57,7 +67,6 @@ slash = SlashCommand(client, sync_commands=True)
 async def on_ready():
     "Function to determine what commands are to be if bot is connected to Discord"
     print(f"logged in as {client.user.name}#{client.user.discriminator}")
-    print("Miku Online.")
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
     await STDOUT_CHANNEL.send(f"Prototype {__version__} Online.")
 
