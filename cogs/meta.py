@@ -65,7 +65,7 @@ class Meta(commands.Cog):
         info.add_field(name="Top Role in this Server", value=user.top_role)
         info.add_field(
             name="Dev Team", value=f"{skyascii}, {adil}, {marsh}", inline=False)
-        info.add_field(name="Version", value='1.2.0')
+        info.add_field(name="Version", value='1.3.0')
         info.set_footer(text="Avatar drawn by marshadow#7063")
         info.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=info)
