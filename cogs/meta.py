@@ -4,10 +4,14 @@ Meta commands for the Miku bot
 
 import datetime
 import time
+from typing import Text
 import discord
+from discord.enums import ChannelType
+from discord.ext.commands.core import guild_only
+from discord_slash import SlashCommand, cog_ext, SlashContext
 from discord.ext import commands
 
-
+__GUILD_ID__ = [846609621429780520]
 # this is very important for creating a cog
 class Meta(commands.Cog):
     "Python class that handles all meta commands"
@@ -25,19 +29,9 @@ class Meta(commands.Cog):
         global startTime
         startTime = time.time()
 
-    # create a command in the cog
-    @commands.command(name="Uptime")
-    async def _uptime(self, ctx):
 
-        # what this is doing is creating a variable called "uptime" and assigning it
-        # a string value based off calling a time.time() snapshot now, and subtracting
-        # the global from earlier
-        uptime = str(datetime.timedelta(
-            seconds=int(round(time.time()-startTime))))
-        await ctx.send(uptime)
-
-    @commands.command(name="botinfo", aliases=("bi", ))
-    async def command_botinfo(self, ctx):
+    @cog_ext.cog_slash(name="botinfo", description="Display info about the bot", guild_ids=__GUILD_ID__)
+    async def command_botinfo(self, ctx: SlashContext):
         "Returns information about the bot"
 
         SKYASCII = ctx.guild.get_member(614053918867062785)
@@ -50,7 +44,6 @@ class Meta(commands.Cog):
 
 
         user = ctx.guild.get_member(886914091657101313)
-        perm_list = [perm[0] for perm in user.guild_permissions if perm[1]]
         info = discord.Embed(
             title="Bot Info",
             color=discord.Color.from_rgb(3, 252, 252)
@@ -77,6 +70,27 @@ class Meta(commands.Cog):
         info.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=info)
 
+    @cog_ext.cog_slash(name="serverinfo", description="Get server info", guild_ids=__GUILD_ID__)
+    async def command_serverinfo(self, ctx: SlashContext):
+
+        info = discord.Embed(
+            color=discord.Color.from_rgb(3, 252, 252)
+        )
+        info.set_author(
+            name=f"{ctx.guild.name}", icon_url=ctx.guild.icon_url)
+        info.add_field(name="Owner", value=f"{ctx.guild.owner.name}#{ctx.guild.owner.discriminator}", inline=True)
+        info.add_field(name="Channel Categories",
+                       value=len(ctx.guild.categories))
+        info.add_field(name="Text Channels",
+                       value=len(ctx.guild.text_channels), inline=True)
+        info.add_field(name="Voice Channels", value=len(ctx.guild.voice_channels))
+        info.add_field(name="Members", value=len([m for m in ctx.guild.members if not m.bot]))
+        info.add_field(name="Bots", value=len([m for m in ctx.guild.members if not m.bot]))
+        info.add_field(name="Roles", value=len(ctx.guild.roles))
+        info.add_field(name="Role list", value=", ".join([str(r.name) for r in ctx.guild.roles]), inline=False)
+        info.set_thumbnail(url=ctx.guild.icon_url)
+        info.set_footer(text=f'Created on {ctx.guild.created_at.strftime("%a, %b %d, %Y %I:%M %p")}')
+        await ctx.send(embed=info)
 
 def setup(bot):
     "Setup command for the bot"

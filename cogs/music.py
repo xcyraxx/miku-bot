@@ -8,7 +8,6 @@ Main contributors:
 from typing import Text
 import urllib.request
 import urllib.parse
-import asyncio
 import re
 import os
 import discord
@@ -67,7 +66,7 @@ class Music(commands.Cog):
             await ctx.send("I'm not connected to Voice Channel.")
 
     @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
-    async def command_play(self, ctx: SlashContext, arg: str):
+    async def command_play(self, ctx: SlashContext, song_name: str):
         """Play a YouTube video using the youtube_dl library
 
         Args:
@@ -75,7 +74,7 @@ class Music(commands.Cog):
         """
         # TODO: FIX : Too many local variables
 
-        if arg:
+        if song_name:
             if not ctx.voice_client:
                 voice_channel = ctx.author.voice.channel
                 voice = await voice_channel.connect()
@@ -86,20 +85,20 @@ class Music(commands.Cog):
                 await ctx.send("Please wait till the current song gets over or Stop it. Queue Function coming soon (savio plez)")
             else:
                 searching = discord.Embed(
-                    title="Searching", description=f"{arg}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+                    title="Searching", description=f"{song_name}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
                 searching.set_thumbnail(url=self.client.user.avatar_url)
 
                 serchbed = await ctx.send(embed=searching)
 
-                valid = validators.url(arg)
+                valid = validators.url(song_name)
                 FFMPEG_OPTIONS = {
                     "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
 
                 YDL_OPTIONS = {}
 
                 query_string = urllib.parse.urlencode({
-                    "search_query": arg
+                    "search_query": song_name
                 })
 
                 htm_content = urllib.request.urlopen(
@@ -118,7 +117,7 @@ class Music(commands.Cog):
 
                 with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
                     if valid:
-                        url3 = arg
+                        url3 = song_name
                         video = pafy.new(url3)
                         url = url3
                         thumb_url = video.thumb
