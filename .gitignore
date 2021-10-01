@@ -1,4 +1,3 @@
-.env
 __pycache__
 .pylintrc
 cogs/__pycache__/meta.cpython-39.pyc
