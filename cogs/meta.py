@@ -89,7 +89,7 @@ class Meta(commands.Cog):
         info.add_field(name="Roles", value=len(ctx.guild.roles))
         info.add_field(name="Role list", value=", ".join([str(r.name) for r in ctx.guild.roles]), inline=False)
         info.set_thumbnail(url=ctx.guild.icon_url)
-        info.set_footer(text=f'Created on {ctx.guild.created_at.strftime("%a, %b %d, %Y %I:%M %p")}')
+        info.set_footer(text=f'ID: {ctx.guild.id} | Created on {ctx.guild.created_at.strftime("%a, %b %d, %Y %I:%M %p")}')
         await ctx.send(embed=info)
 
 def setup(bot):
