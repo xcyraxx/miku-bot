@@ -24,7 +24,7 @@ load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 
 __version__ = "1.3.0"
-__GUILD_ID__ = [846609621429780520]
+__GUILD_ID__ = [846609621429780520, 893122121805496371]
 
 custom_prefixes = {}
 default_prefixes = [">>"]

@@ -11,7 +11,7 @@ from discord.ext.commands.core import guild_only
 from discord_slash import SlashCommand, cog_ext, SlashContext
 from discord.ext import commands
 
-__GUILD_ID__ = [846609621429780520]
+__GUILD_ID__ = [846609621429780520, 893122121805496371]
 # this is very important for creating a cog
 class Meta(commands.Cog):
     "Python class that handles all meta commands"
