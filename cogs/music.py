@@ -41,7 +41,7 @@ class Music(commands.Cog):
                     "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
         self.queue = []
         self.vc = ""
-
+        self.current = ""
 
     @Cog.listener()
     async def on_ready(self):
@@ -55,7 +55,6 @@ class Music(commands.Cog):
 
             #get the first url
             source = self.queue[0][1]
-        
             self.vc.play(source, after=lambda e: self.play_next())
             
         else:
@@ -123,6 +122,7 @@ class Music(commands.Cog):
                 self.vc = ctx.voice_client
 
             if a != "bad":
+                self.current = ctx.TextChannel
                 searching = discord.Embed(
                         title="Searching", description=f"{song_name}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
@@ -160,6 +160,7 @@ class Music(commands.Cog):
                         thumb_url = video.thumb
                         brr = video.title
                         dur = video.duration
+                        auth = ctx.author.mention
 
                     info = ydl.extract_info(url, download=False)
                     url2 = info["formats"][0]["url"]
@@ -167,7 +168,7 @@ class Music(commands.Cog):
                     source = await discord.FFmpegOpusAudio.from_probe(url2, **self.FFMPEG_OPTIONS)
                     
                     if ctx.voice_client.is_playing():
-                        self.queue.append([brr, source, thumb_url, dur])
+                        self.queue.append([brr, source, thumb_url, dur, auth])
                         queued = discord.Embed(
                             title="Added to Queue", 
                             description=f"**{brr}**\n`{dur}`\nRequested by {ctx.author.mention}",
