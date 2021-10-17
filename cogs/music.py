@@ -103,7 +103,7 @@ class Music(commands.Cog):
             await ctx.send("I'm not connected to Voice Channel.")
 
     @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
-    async def command_play(self, ctx: SlashContext, song_name: str):
+    async def command_play(self, ctx, song_name: str):
         """Play a YouTube video using the youtube_dl library
 
         Args:
@@ -112,79 +112,84 @@ class Music(commands.Cog):
         # TODO: FIX : Too many local variables
 
         if song_name:
+            a = "gud"
             if not ctx.voice_client:
-                voice_channel = ctx.author.voice.channel
-                self.vc = await voice_channel.connect()
+                if not ctx.author.voice:
+                    a = "bad" #bad way i know
+                else:
+                    voice_channel = ctx.author.voice.channel                
+                    self.vc = await voice_channel.connect()
             else:
                 self.vc = ctx.voice_client
 
-           
-            searching = discord.Embed(
-                    title="Searching", description=f"{song_name}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+            if a != "bad":
+                searching = discord.Embed(
+                        title="Searching", description=f"{song_name}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
-            searching.set_thumbnail(url="https://media.discordapp.net/attachments/884694080708300831/899203305140518962/mikuload.gif?width=469&height=469")
+                searching.set_thumbnail(url="https://media.discordapp.net/attachments/884694080708300831/899203305140518962/mikuload.gif?width=469&height=469")
 
-            serchbed = await ctx.send(embed=searching)
+                serchbed = await ctx.send(embed=searching)
 
-            valid = validators.url(song_name)
-                
-            YDL_OPTIONS = {}
+                valid = validators.url(song_name)
+                    
+                YDL_OPTIONS = {}
 
-            query_string = urllib.parse.urlencode({
-                    "search_query": song_name
-                })
+                query_string = urllib.parse.urlencode({
+                        "search_query": song_name
+                    })
 
-            htm_content = urllib.request.urlopen(
-                    "https://www.youtube.com/results?" + query_string
-                )
-
-            search_results = re.findall(
-                    r"watch\?v=(\S{11})", htm_content.read().decode())
-
-            url = f"http://www.youtube.com/watch?v={search_results[1]}"
-
-            vid = pafy.new(url)
-            brr = vid.title
-            thumb_url = vid.thumb
-            dur = vid.duration
-
-            with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-                if valid:
-                    url3 = song_name
-                    video = pafy.new(url3)
-                    url = url3
-                    thumb_url = video.thumb
-                    brr = video.title
-                    dur = video.duration
-
-                info = ydl.extract_info(url, download=False)
-                url2 = info["formats"][0]["url"]
-
-                source = await discord.FFmpegOpusAudio.from_probe(url2, **self.FFMPEG_OPTIONS)
-                
-                if ctx.voice_client.is_playing():
-                    self.queue.append([brr, source,thumb_url, dur])
-                    queued = discord.Embed(
-                        title="Added to Queue", 
-                        description=f"**{brr}**\n`{dur}`\nRequested by {ctx.author.mention}",
-                        color=discord.Color.from_rgb(3, 252, 252),
-                        timestamp=ctx.message.created_at
+                htm_content = urllib.request.urlopen(
+                        "https://www.youtube.com/results?" + query_string
                     )
-                    await serchbed.edit(embed=queued)
-                    print(self.queue) # debugging
-                else:
-                    playing = discord.Embed(
-                            title="Now Playing", description=f"🎶[{brr}]({url})\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252),
-                            timestamp=ctx.message.created_at)
 
-                    playing.set_thumbnail(url=thumb_url)
+                search_results = re.findall(
+                        r"watch\?v=(\S{11})", htm_content.read().decode())
 
-                    self.vc.play(source)
+                url = f"http://www.youtube.com/watch?v={search_results[1]}"
 
-                    await serchbed.edit(embed=playing)
+                vid = pafy.new(url)
+                brr = vid.title
+                thumb_url = vid.thumb
+                dur = vid.duration
 
+                with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+                    if valid:
+                        url3 = song_name
+                        video = pafy.new(url3)
+                        url = url3
+                        thumb_url = video.thumb
+                        brr = video.title
+                        dur = video.duration
+
+                    info = ydl.extract_info(url, download=False)
+                    url2 = info["formats"][0]["url"]
+
+                    source = await discord.FFmpegOpusAudio.from_probe(url2, **self.FFMPEG_OPTIONS)
+                    
+                    if ctx.voice_client.is_playing():
+                        self.queue.append([brr, source, thumb_url, dur])
+                        queued = discord.Embed(
+                            title="Added to Queue", 
+                            description=f"**{brr}**\n`{dur}`\nRequested by {ctx.author.mention}",
+                            color=discord.Color.from_rgb(3, 252, 252),
+                            timestamp=ctx.message.created_at
+                        )
+                        queued.set_thumbnail(url=thumb_url)
+                        await serchbed.edit(embed=queued)
+                    else:
+                        playing = discord.Embed(
+                                title="Now Playing", description=f"🎶{brr}\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252),
+                                timestamp=ctx.message.created_at)
+
+                        playing.set_thumbnail(url=thumb_url)
+
+                        self.vc.play(source)
+
+                        await serchbed.edit(embed=playing)
+            else:
+                await ctx.send("You're not connected to a voice channel.")
         else:
-            await ctx.send(f"Provide a name or a link to play the song. Usage: `{PREFIX}play song name`")
+            await ctx.send(f"Provide a name or a link to play the song. Usage: `/play song name`")
 
     @cog_ext.cog_slash(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
     async def _pause(self, ctx):
@@ -200,9 +205,16 @@ class Music(commands.Cog):
     @cog_ext.cog_slash(name="skip", description="Skips the current song being played.", guild_ids=__GUILD_ID__)
     async def _skip(self, ctx):
         ctx.voice_client.stop()
+        brr = self.queue[0][0]
+        dur = self.queue[0][3]
+        thumb_url = self.queue[0][2]
         #try to play next in the queue if it exists
         await self.play_music()
-        await ctx.send("skipped lmao")
+        new = discord.Embed(
+            title="Now Playing",
+            description=f"🎶[{brr}]({url})\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+        new.set_thumbnail(url=thumb_url)
+        await ctx.send("Skipped⏩", embed=new)
 
     @cog_ext.cog_slash(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
     async def _resume(self, ctx):
