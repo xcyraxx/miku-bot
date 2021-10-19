@@ -66,8 +66,6 @@ class Music(commands.Cog):
             self.is_playing = True
 
             source = self.queue[0][1]
-            
-            print(self.queue)
             #remove the first element as you are currently playing it
             self.queue.pop(0)
 
@@ -86,10 +84,10 @@ class Music(commands.Cog):
 
             if ctx.voice_client is None:
                 self.vc = await voice_channel.connect()
-                await ctx.send("Hi there!")
+                await ctx.send(f"`Connected to `<#{ctx.author.voice.channel.id}>")
             else:
                 self.vc = await ctx.voice_client.move_to(voice_channel)
-                await ctx.send("Hi there!")
+                await ctx.send(f"`Switched to `<#{ctx.author.voice.channel.id}>")
 
     @cog_ext.cog_slash(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
     async def command_leave(self, ctx):
@@ -97,7 +95,7 @@ class Music(commands.Cog):
 
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
-            await ctx.send("See ya!")
+            await ctx.send("https://tenor.com/view/aight-imma-head-out-im-out-this-bitch-bye-gif-15194343")
         else:
             await ctx.send("I'm not connected to Voice Channel.")
 
@@ -122,7 +120,6 @@ class Music(commands.Cog):
                 self.vc = ctx.voice_client
 
             if a != "bad":
-                self.current = ctx.TextChannel
                 searching = discord.Embed(
                         title="Searching", description=f"{song_name}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
@@ -151,6 +148,7 @@ class Music(commands.Cog):
                 brr = vid.title
                 thumb_url = vid.thumb
                 dur = vid.duration
+                auth = ctx.author.mention
 
                 with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
                     if valid:
@@ -203,19 +201,25 @@ class Music(commands.Cog):
             await ctx.send("There isn't anything to pause.")
 
 
-    @cog_ext.cog_slash(name="skip", description="Skips the current song being played.", guild_ids=__GUILD_ID__)
+    @cog_ext.cog_slash(name="skip", description="Skips the current song.", guild_ids=__GUILD_ID__)
     async def _skip(self, ctx):
-        ctx.voice_client.stop()
-        brr = self.queue[0][0]
-        dur = self.queue[0][3]
-        thumb_url = self.queue[0][2]
-        #try to play next in the queue if it exists
-        await self.play_music()
-        new = discord.Embed(
-            title="Now Playing",
-            description=f"🎶[{brr}]({url})\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
-        new.set_thumbnail(url=thumb_url)
-        await ctx.send("Skipped⏩", embed=new)
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+        else:
+            await ctx.send("A library is louder than the vc rn-")
+        if len(self.queue) <= 0:
+            await ctx.send("The Queue is empty")
+        else:
+            brr = self.queue[0][0]
+            dur = self.queue[0][3]
+            thumb_url = self.queue[0][2]
+            #try to play next in the queue if it exists
+            await self.play_music()
+            new = discord.Embed(
+                title="Now Playing",
+                description=f"🎶{brr}\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+            new.set_thumbnail(url=thumb_url)
+            await ctx.send("Skipped⏩", embed=new)
 
     @cog_ext.cog_slash(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
     async def _resume(self, ctx):
@@ -223,7 +227,7 @@ class Music(commands.Cog):
 
         if ctx.voice_client:
             ctx.voice_client.resume()
-            await ctx.send("Resume ▶️")
+            await ctx.send("Resumed ▶️")
         else:
             await ctx.send("There isn't anything to resume.")
 
@@ -237,11 +241,17 @@ class Music(commands.Cog):
         else:
             await ctx.send("There isn't anything to stop.")
 
-    @cog_ext.cog_slash(name="queue", description="Displays the current queue.", guild_ids=__GUILD_ID__)
+    @cog_ext.cog_slash(name="clear", description="Clear the current queue.", guild_ids=__GUILD_ID__)
+    async def _clear(self, ctx):
+        self.queue.clear()
+        await ctx.send("Queue cleared.")
+
+    @cog_ext.cog_slash(name="queue", description="List the current queue.", guild_ids=__GUILD_ID__)
     async def _queue(self, ctx):
-        "Displays current song queue/list"
+        iuiu = []
         for i in self.queue:
-            print(i)
+            iuiu.append(i[0])
+        await ctx.send(str(iuiu))
 
 
 def setup(bot):

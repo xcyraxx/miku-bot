@@ -86,7 +86,7 @@ async def setprefix(ctx, *, prefixes=""):
 MAIN_HELP = "**Miku** - The only music bot you'll ever need!\nDiscord will only be supporting slash commands soon. Use `/help` for commands."
 
 MUSIC_HELP = """
-**`summon`**: 
+**`join`**: 
     Connect the bot your current Voice Channel.
 
 **`play <song_name | url>`**: 
