@@ -38,7 +38,7 @@ class Music(commands.Cog):
 
         self.client = client
         self.FFMPEG_OPTIONS = {
-                    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
+            "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
         self.queue = []
         self.vc = ""
         self.current = ""
@@ -53,20 +53,20 @@ class Music(commands.Cog):
         if len(self.queue) > 0:
             self.is_playing = True
 
-            #get the first url
+            # get the first url
             source = self.queue[0][1]
             self.vc.play(source, after=lambda e: self.play_next())
-            
+
         else:
             self.is_playing = False
 
-    # infinite loop checking 
+    # infinite loop checking
     async def play_music(self):
         if len(self.queue) > 0:
             self.is_playing = True
 
             source = self.queue[0][1]
-            #remove the first element as you are currently playing it
+            # remove the first element as you are currently playing it
             self.queue.pop(0)
 
             self.vc.play(source, after=lambda e: self.play_next())
@@ -99,6 +99,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("I'm not connected to Voice Channel.")
 
+    # FIX: Low quality code
     @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
     async def command_play(self, ctx, song_name: str):
         """Play a YouTube video using the youtube_dl library
@@ -108,39 +109,42 @@ class Music(commands.Cog):
         """
         # TODO: FIX : Too many local variables
 
-        if song_name:
+        if ctx.author.voice is None:
+            await ctx.send("You're not connected to a Voice Channel.")
+
+        elif song_name:
             a = "gud"
-            if not ctx.voice_client:
-                if not ctx.author.voice:
-                    a = "bad" #bad way i know
-                else:
-                    voice_channel = ctx.author.voice.channel                
-                    self.vc = await voice_channel.connect()
-            else:
+            if ctx.voice_client:
                 self.vc = ctx.voice_client
 
+            elif not ctx.author.voice:
+                a = "bad"  # bad way i know
+            else:
+                voice_channel = ctx.author.voice.channel
+                self.vc = await voice_channel.connect()
             if a != "bad":
                 searching = discord.Embed(
-                        title="Searching", description=f"{song_name}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+                    title="Searching", description=f"{song_name}\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
 
-                searching.set_thumbnail(url="https://media.discordapp.net/attachments/884694080708300831/899203305140518962/mikuload.gif?width=469&height=469")
+                searching.set_thumbnail(
+                    url="https://media.discordapp.net/attachments/884694080708300831/899203305140518962/mikuload.gif?width=469&height=469")
 
                 serchbed = await ctx.send(embed=searching)
 
                 valid = validators.url(song_name)
-                    
+
                 YDL_OPTIONS = {}
 
                 query_string = urllib.parse.urlencode({
-                        "search_query": song_name
-                    })
+                    "search_query": song_name
+                })
 
                 htm_content = urllib.request.urlopen(
-                        "https://www.youtube.com/results?" + query_string
-                    )
+                    "https://www.youtube.com/results?" + query_string
+                )
 
                 search_results = re.findall(
-                        r"watch\?v=(\S{11})", htm_content.read().decode())
+                    r"watch\?v=(\S{11})", htm_content.read().decode())
 
                 url = f"http://www.youtube.com/watch?v={search_results[1]}"
 
@@ -164,11 +168,11 @@ class Music(commands.Cog):
                     url2 = info["formats"][0]["url"]
 
                     source = await discord.FFmpegOpusAudio.from_probe(url2, **self.FFMPEG_OPTIONS)
-                    
+
                     if ctx.voice_client.is_playing():
                         self.queue.append([brr, source, thumb_url, dur, auth])
                         queued = discord.Embed(
-                            title="Added to Queue", 
+                            title="Added to Queue",
                             description=f"**{brr}**\n`{dur}`\nRequested by {ctx.author.mention}",
                             color=discord.Color.from_rgb(3, 252, 252),
                             timestamp=ctx.message.created_at
@@ -177,8 +181,8 @@ class Music(commands.Cog):
                         await serchbed.edit(embed=queued)
                     else:
                         playing = discord.Embed(
-                                title="Now Playing", description=f"🎶{brr}\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252),
-                                timestamp=ctx.message.created_at)
+                            title="Now Playing", description=f"🎶{brr}\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252),
+                            timestamp=ctx.message.created_at)
 
                         playing.set_thumbnail(url=thumb_url)
 
@@ -188,7 +192,9 @@ class Music(commands.Cog):
             else:
                 await ctx.send("You're not connected to a voice channel.")
         else:
-            await ctx.send(f"Provide a name or a link to play the song. Usage: `/play song name`")
+            await ctx.send(
+                'Provide a name or a link to play the song. Usage: `/play song name`'
+            )
 
     @cog_ext.cog_slash(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
     async def _pause(self, ctx):
@@ -199,7 +205,6 @@ class Music(commands.Cog):
             await ctx.send("Paused ⏸️")
         else:
             await ctx.send("There isn't anything to pause.")
-
 
     @cog_ext.cog_slash(name="skip", description="Skips the current song.", guild_ids=__GUILD_ID__)
     async def _skip(self, ctx):
@@ -213,7 +218,7 @@ class Music(commands.Cog):
             brr = self.queue[0][0]
             dur = self.queue[0][3]
             thumb_url = self.queue[0][2]
-            #try to play next in the queue if it exists
+            # try to play next in the queue if it exists
             await self.play_music()
             new = discord.Embed(
                 title="Now Playing",
@@ -248,9 +253,7 @@ class Music(commands.Cog):
 
     @cog_ext.cog_slash(name="queue", description="List the current queue.", guild_ids=__GUILD_ID__)
     async def _queue(self, ctx):
-        iuiu = []
-        for i in self.queue:
-            iuiu.append(i[0])
+        iuiu = [i[0] for i in self.queue]
         await ctx.send(str(iuiu))
 
 
