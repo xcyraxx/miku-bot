@@ -41,7 +41,7 @@ class Music(commands.Cog):
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
         self.queue = []
         self.vc = ""
-        self.current = ""
+        self.current_song = ""
 
     @Cog.listener()
     async def on_ready(self):
@@ -53,7 +53,7 @@ class Music(commands.Cog):
         if len(self.queue) > 0:
             self.is_playing = True
 
-            # get the first url
+            self.current_song = self.queue[0][0]
             source = self.queue[0][1]
             self.vc.play(source, after=lambda e: self.play_next())
 
@@ -65,8 +65,8 @@ class Music(commands.Cog):
         if len(self.queue) > 0:
             self.is_playing = True
 
+            self.current_song = self.queue[0][0]
             source = self.queue[0][1]
-            # remove the first element as you are currently playing it
             self.queue.pop(0)
 
             self.vc.play(source, after=lambda e: self.play_next())
@@ -187,6 +187,7 @@ class Music(commands.Cog):
                         playing.set_thumbnail(url=thumb_url)
 
                         self.vc.play(source)
+                        self.current_song = brr
 
                         await serchbed.edit(embed=playing)
             else:
@@ -199,12 +200,15 @@ class Music(commands.Cog):
     @cog_ext.cog_slash(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
     async def _pause(self, ctx):
         "Pause music"
-
-        if ctx.voice_client:
-            ctx.voice_client.pause()
-            await ctx.send("Paused ⏸️")
-        else:
-            await ctx.send("There isn't anything to pause.")
+        with ctx.typing():
+            if ctx.voice_client:
+                if ctx.voice_client.is_playing():
+                    ctx.voice_client.pause()
+                    await ctx.send("Paused ⏸️")
+                else:
+                    await ctx.send("Nothing is playing")
+            else:
+                await ctx.send("I'm not connected to a voice channel.")
 
     @cog_ext.cog_slash(name="skip", description="Skips the current song.", guild_ids=__GUILD_ID__)
     async def _skip(self, ctx):
@@ -253,8 +257,24 @@ class Music(commands.Cog):
 
     @cog_ext.cog_slash(name="queue", description="List the current queue.", guild_ids=__GUILD_ID__)
     async def _queue(self, ctx):
-        iuiu = [i[0] for i in self.queue]
-        await ctx.send(str(iuiu))
+        qprint = []
+        brr = []
+        if len(self.queue) > 0:
+            for i in self.queue:
+                qprint.append(i[0])
+            for number, song in enumerate(qprint, start=1):
+                brr.append(f"**{number}**. {song}")
+            queue = discord.Embed(
+                title="Queue",
+                description=f"Now playing: **{self.current_song}**",
+                color=discord.Color.from_rgb(3, 252, 252)
+            )
+            queue.add_field(value="\n".join(brr), name="Next")
+            queue.set_footer(text=f"{len(self.queue)} songs in queue | Use /skip to skip songs.")
+            await ctx.send(embed=queue)
+
+        else:
+            await ctx.send("The queue is empty.")
 
 
 def setup(bot):
