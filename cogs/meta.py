@@ -98,7 +98,7 @@ class Meta(commands.Cog):
                  option_type=6,
                  required=False)
     ])
-    async def command_avatar(self, ctx: SlashContext, user):
+    async def command_avatar(self, ctx: SlashContext, user=None):
         "Returns the avatar of the user"
         if user:
             pass
