@@ -107,6 +107,8 @@ OTHER_HELP = """
     Some info about the Bot.
 **`setprefix`**:
     Set a custom prefix for the Bot.
+**`avatar`**:
+    Get your own/another user's avatar.
 """
 
 
