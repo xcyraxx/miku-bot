@@ -41,7 +41,7 @@ class Music(commands.Cog):
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
         self.queue = []
         self.vc = ""
-        self.current_song = ""
+        self.current_song = []
 
     @Cog.listener()
     async def on_ready(self):
@@ -53,7 +53,7 @@ class Music(commands.Cog):
         if len(self.queue) > 0:
             self.is_playing = True
 
-            self.current_song = self.queue[0][0]
+            self.current_song = self.queue[0]
             source = self.queue[0][1]
             self.vc.play(source, after=lambda e: self.play_next())
 
@@ -65,7 +65,7 @@ class Music(commands.Cog):
         if len(self.queue) > 0:
             self.is_playing = True
 
-            self.current_song = self.queue[0][0]
+            self.current_song = self.queue[0]
             source = self.queue[0][1]
             self.queue.pop(0)
 
@@ -170,7 +170,7 @@ class Music(commands.Cog):
                     source = await discord.FFmpegOpusAudio.from_probe(url2, **self.FFMPEG_OPTIONS)
 
                     if ctx.voice_client.is_playing():
-                        self.queue.append([brr, source, thumb_url, dur, auth])
+                        self.queue.append([brr, source, thumb_url, dur, auth, url])
                         queued = discord.Embed(
                             title="Added to Queue",
                             description=f"**{brr}**\n`{dur}`\nRequested by {ctx.author.mention}",
@@ -187,7 +187,7 @@ class Music(commands.Cog):
                         playing.set_thumbnail(url=thumb_url)
 
                         self.vc.play(source)
-                        self.current_song = brr
+                        self.current_song = [brr, source, thumb_url, dur, auth, url]
 
                         await serchbed.edit(embed=playing)
             else:
@@ -255,27 +255,23 @@ class Music(commands.Cog):
         self.queue.clear()
         await ctx.send("Queue cleared.")
 
-    @cog_ext.cog_slash(name="queue", description="List the current queue.", guild_ids=__GUILD_ID__)
+    #queue command
+    @cog_ext.cog_slash(name="queue", description="View the current queue.", guild_ids=__GUILD_ID__)
     async def _queue(self, ctx):
-        qprint = []
-        brr = []
-        if len(self.queue) > 0:
-            for i in self.queue:
-                qprint.append(i[0])
-            for number, song in enumerate(qprint, start=1):
-                brr.append(f"**{number}**. {song}")
-            queue = discord.Embed(
+        if len(self.queue) <= 0:
+            await ctx.send("The Queue is empty")
+        else:
+            embed = discord.Embed(
                 title="Queue",
-                description=f"Now playing: **{self.current_song}**",
                 color=discord.Color.from_rgb(3, 252, 252)
             )
-            queue.add_field(value="\n".join(brr), name="Next")
-            queue.set_footer(text=f"{len(self.queue)} songs in queue | Use /skip to skip songs.")
-            await ctx.send(embed=queue)
-
-        else:
-            await ctx.send("The queue is empty.")
-
+            embed.add_field(name="Current", value=f"[{self.current_song[0]}]({self.current_song[5]}) `{self.current_song[3]}`", inline=False)
+            embed.add_field(name="Up next", value="\n".join(
+                    [f"`{i + 1}.` [{song[0]}]({song[5]}) `[{song[3]}]`" for i, song in enumerate(self.queue)]
+                ))
+            embed.set_thumbnail(url=self.client.user.avatar_url)
+            embed.set_footer(text=f"{len(self.queue)} songs in queue. | use /skip to skip songs")
+            await ctx.send(embed=embed)
 
 def setup(bot):
     "Setup command for the bot"
