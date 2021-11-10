@@ -100,6 +100,16 @@ MUSIC_HELP = """
 
 **`resume`**: 
     Resume playing the song.
+
+**`skip`**:
+    Skip the current song.
+
+**`leave`**:
+    Leave the vc.
+
+**`queue`**:
+    Display the current queue(Is very shit rn, im working on it).
+
 """
 
 OTHER_HELP = """
