@@ -166,13 +166,11 @@ async def on_component(ctx: ComponentContext):
         description = OTHER_HELP,
         color=discord.Color.from_rgb(3, 252, 252)
     )
-    
+
     if 'm00sik' in ctx.selected_options:
         await ctx.edit_origin(embed = music)
-        pass
     elif 'settings' in ctx.selected_options:
         await ctx.edit_origin(embed = sets)
-        pass
 
 
 client.load_extension("cogs.music")
