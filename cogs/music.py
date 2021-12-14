@@ -7,12 +7,16 @@ Main contributors:
 
 import datetime as dt
 import os
+from lyricsgenius import Genius
 import re
+import requests
 import urllib.parse
+from bs4 import BeautifulSoup
 import urllib.request
 from typing import Text
 
 import discord
+from discord_slash.utils.manage_commands import create_option
 import pafy
 import validators
 import youtube_dl
@@ -24,7 +28,6 @@ from validators.url import url
 
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
 PREFIX = os.environ.get("PREFIX")
-
 
 class Music(commands.Cog):
     """Main class for the Music command
@@ -42,6 +45,8 @@ class Music(commands.Cog):
         self.queue = []
         self.vc = ""
         self.current_song = []
+        self.GENIUS_TOKEN = "BZDhGkSxGrYjp4ljfm4NaTbWPe15Ll3lHVlSwFeKuOxj-YdmwLTj4C6j8ULojoh6"
+        self.genius = Genius(self.GENIUS_TOKEN)
 
     @Cog.listener()
     async def on_ready(self):
@@ -278,6 +283,55 @@ class Music(commands.Cog):
                 text=f"{len(self.queue)} songs in queue. | use /skip to skip songs")
             await ctx.send(embed=embed)
 
+    #command to get lyrics from genius
+    @cog_ext.cog_slash(name="lyrics", description="Get the lyrics of a song.", guild_ids=__GUILD_ID__,
+    options=[
+        create_option(
+            name="song",
+            description="The song to get the lyrics of.",
+            option_type=3,
+            required=False
+        )
+    ]
+    )
+    async def _lyrics(self, ctx, song):
+        # get the song from genius
+        try:
+            song = self.genius.search_song(song)
+        except:
+            await ctx.send("Couldn't find the song")
+            return
+        if not song:
+            await ctx.send("Couldn't find the song")
+            return
+
+        if song.lyrics is None:
+            await ctx.send("Couldn't find the lyrics for that song")
+            return
+        # get the lyrics
+        lyrics = song.lyrics.replace("EmbedShare URLCopyEmbedCopy", "")
+        thumbnail = song.song_art_image_url
+        if lyrics is None:
+            await ctx.send("Couldn't find the lyrics")
+            return
+        
+        if len(lyrics) > 2000:
+            s1 = lyrics[:len(lyrics)//2]
+            embed = discord.Embed(
+                title=f"Lyrics for {song.full_title}",
+                description=f"{s1}\n\n[Full lyrics here]({song.url})",
+                color=discord.Color.from_rgb(3, 252, 252)
+            )
+            embed.set_thumbnail(url=thumbnail)
+            embed.set_footer(text=f"Requested by {ctx.author.name} | Artist: {song.artist}")
+            await ctx.send(embed=embed)
+        else:
+            e = discord.Embed(
+                title=f"Lyrics for {song.full_title}", description=lyrics, color=discord.Color.from_rgb(3, 252, 252)
+            )
+            e.set_thumbnail(url=thumbnail)
+            e.set_footer(text=f"Requested by {ctx.author.name} | Artist: {song.artist}")
+            await ctx.send(embed=e)
 
 def setup(bot):
     "Setup command for the bot"
