@@ -179,6 +179,26 @@ async def on_component(ctx: ComponentContext):
         await ctx.edit_origin(embed=sets)
 
 
-client.load_extension("cogs.music")
-client.load_extension("cogs.meta")
+command_modules = [
+    module[:-3]
+    for module in os.listdir(f"{os.path.dirname(__file__)}/cogs")
+    if module[-3:] == ".py"
+]
+
+if command_modules:
+    print("Importing cogs. Please stand by...")
+    print(
+        f"Importing {len(command_modules)} cogs: {', '.join(command_modules)}")
+else:
+    print("Could not import any cogs!")
+
+# dynamically load all cogs found in cogs/ as cog extensions
+for module in command_modules:
+    try:
+        client.load_extension("cogs." + module)
+    except Exception as e:
+        print(f"Could not import cog {module}: \n{e}")
+
+print(f"Cogs imported: {', '.join(command_modules)}")
+
 client.run(TOKEN)
