@@ -5,20 +5,23 @@ Main contributors:
     @savioxavier, @xcyraxx, @UndriveAssassin
     Assassin
 """
-#ol(
+# ol(
 
-from gc import set_threshold
 import os
+from gc import set_threshold
+
 import discord
 from discord.enums import Status
 from discord.ext import commands
 from discord.ext.commands import bot
-from dotenv import load_dotenv
 from discord_slash import SlashCommand
 from discord_slash.model import ButtonStyle
-from discord_slash.utils.manage_components import wait_for_component, ComponentContext
-from discord_slash.utils.manage_components import create_select, create_select_option, create_actionrow
-
+from discord_slash.utils.manage_components import (ComponentContext,
+                                                   create_actionrow,
+                                                   create_select,
+                                                   create_select_option,
+                                                   wait_for_component)
+from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.environ.get("TOKEN")
@@ -62,6 +65,7 @@ client = commands.Bot(command_prefix=determine_prefix,
                       status=Status.idle
                       )
 slash = SlashCommand(client, sync_commands=True)
+
 
 @client.event
 async def on_ready():
@@ -122,7 +126,7 @@ OTHER_HELP = """
 """
 
 
-#help command
+# help command
 @client.command(name="help", description="List commands")
 async def command_help(ctx):
     "Main help command for the bot"
@@ -132,16 +136,17 @@ async def command_help(ctx):
         color=discord.Color.from_rgb(3, 252, 252))
     bot_help.set_thumbnail(url=client.user.avatar_url)
     await ctx.send(embed=bot_help)
-    
+
 
 @slash.slash(name="help", guild_ids=__GUILD_ID__, description="list all commands.")
 async def _help(ctx):
     select = create_select(
-        options=[# the options in your dropdown
+        options=[  # the options in your dropdown
             create_select_option("Music", value="m00sik", emoji="🎶"),
             create_select_option("Other", value="settings", emoji="⚙️"),
         ],
-        placeholder="Select Category",  # the placeholder text to show when no options have been chosen
+        # the placeholder text to show when no options have been chosen
+        placeholder="Select Category",
         min_values=1,  # the minimum number of options a user must select
         max_values=1,  # the maximum number of options a user can select
     )
@@ -151,26 +156,27 @@ async def _help(ctx):
         title="Miku Help",
         description="Select Category for commands.",
         color=discord.Color.from_rgb(3, 252, 252))
-    await ctx.send(embed = bot_help, components = [action_row])
+    await ctx.send(embed=bot_help, components=[action_row])
+
 
 @client.event
 async def on_component(ctx: ComponentContext):
     # ctx.selected_options is a list of all the values the user selected
     music = discord.Embed(
-        title = "Miku Help",
-        description = MUSIC_HELP,
+        title="Miku Help",
+        description=MUSIC_HELP,
         color=discord.Color.from_rgb(3, 252, 252)
     )
     sets = discord.Embed(
-        title = "Miku Help",
-        description = OTHER_HELP,
+        title="Miku Help",
+        description=OTHER_HELP,
         color=discord.Color.from_rgb(3, 252, 252)
     )
 
     if 'm00sik' in ctx.selected_options:
-        await ctx.edit_origin(embed = music)
+        await ctx.edit_origin(embed=music)
     elif 'settings' in ctx.selected_options:
-        await ctx.edit_origin(embed = sets)
+        await ctx.edit_origin(embed=sets)
 
 
 client.load_extension("cogs.music")

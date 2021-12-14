@@ -5,22 +5,22 @@ Main contributors:
     @savioxavier, @xcyraxx, @UndriveAssassin
 """
 
-from typing import Text
-import urllib.request
-import urllib.parse
-import re
+import datetime as dt
 import os
+import re
+import urllib.parse
+import urllib.request
+from typing import Text
+
 import discord
+import pafy
+import validators
+import youtube_dl
 from discord import voice_client
 from discord.ext import commands
 from discord.ext.commands import Cog
+from discord_slash import SlashCommand, SlashContext, cog_ext
 from validators.url import url
-import datetime as dt
-
-import youtube_dl
-import validators
-from discord_slash import SlashCommand, cog_ext, SlashContext
-import pafy
 
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
 PREFIX = os.environ.get("PREFIX")
@@ -170,7 +170,8 @@ class Music(commands.Cog):
                     source = await discord.FFmpegOpusAudio.from_probe(url2, **self.FFMPEG_OPTIONS)
 
                     if ctx.voice_client.is_playing():
-                        self.queue.append([brr, source, thumb_url, dur, auth, url])
+                        self.queue.append(
+                            [brr, source, thumb_url, dur, auth, url])
                         queued = discord.Embed(
                             title="Added to Queue",
                             description=f"**{brr}**\n`{dur}`\nRequested by {ctx.author.mention}",
@@ -187,7 +188,8 @@ class Music(commands.Cog):
                         playing.set_thumbnail(url=thumb_url)
 
                         self.vc.play(source)
-                        self.current_song = [brr, source, thumb_url, dur, auth, url]
+                        self.current_song = [
+                            brr, source, thumb_url, dur, auth, url]
 
                         await serchbed.edit(embed=playing)
             else:
@@ -255,7 +257,7 @@ class Music(commands.Cog):
         self.queue.clear()
         await ctx.send("Queue cleared.")
 
-    #queue command
+    # queue command
     @cog_ext.cog_slash(name="queue", description="View the current queue.", guild_ids=__GUILD_ID__)
     async def _queue(self, ctx):
         if len(self.queue) <= 0:
@@ -265,13 +267,17 @@ class Music(commands.Cog):
                 title="Queue",
                 color=discord.Color.from_rgb(3, 252, 252)
             )
-            embed.add_field(name="Current", value=f"[{self.current_song[0]}]({self.current_song[5]}) `{self.current_song[3]}`", inline=False)
+            embed.add_field(
+                name="Current", value=f"[{self.current_song[0]}]({self.current_song[5]}) `{self.current_song[3]}`", inline=False)
             embed.add_field(name="Up next", value="\n".join(
-                    [f"`{i + 1}.` [{song[0]}]({song[5]}) `[{song[3]}]`" for i, song in enumerate(self.queue)]
-                ))
+                [f"`{i + 1}.` [{song[0]}]({song[5]}) `[{song[3]}]`" for i,
+                 song in enumerate(self.queue)]
+            ))
             embed.set_thumbnail(url=self.client.user.avatar_url)
-            embed.set_footer(text=f"{len(self.queue)} songs in queue. | use /skip to skip songs")
+            embed.set_footer(
+                text=f"{len(self.queue)} songs in queue. | use /skip to skip songs")
             await ctx.send(embed=embed)
+
 
 def setup(bot):
     "Setup command for the bot"

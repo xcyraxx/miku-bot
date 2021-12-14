@@ -5,16 +5,21 @@ Meta commands for the Miku bot
 import datetime
 import time
 from typing import Text
+
 import discord
 from discord.enums import ChannelType
-from discord.ext.commands.core import guild_only
-from discord_slash.utils.manage_commands import create_option
-from discord_slash.utils.manage_components import create_select, create_select_option, create_actionrow
-from discord_slash import SlashCommand, cog_ext, SlashContext 
 from discord.ext import commands
+from discord.ext.commands.core import guild_only
+from discord_slash import SlashCommand, SlashContext, cog_ext
+from discord_slash.utils.manage_commands import create_option
+from discord_slash.utils.manage_components import (create_actionrow,
+                                                   create_select,
+                                                   create_select_option)
 
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
 # this is very important for creating a cog
+
+
 class Meta(commands.Cog):
     "Python class that handles all meta commands"
 
@@ -30,7 +35,6 @@ class Meta(commands.Cog):
         print("Meta up!")
         global startTime
         startTime = time.time()
-
 
     @cog_ext.cog_slash(name="botinfo", description="Display info about the bot", guild_ids=__GUILD_ID__)
     async def command_botinfo(self, ctx: SlashContext):
@@ -75,29 +79,35 @@ class Meta(commands.Cog):
         )
         info.set_author(
             name=f"{ctx.guild.name}", icon_url=ctx.guild.icon_url)
-        info.add_field(name="Owner", value=f"{ctx.guild.owner.name}#{ctx.guild.owner.discriminator}", inline=True)
+        info.add_field(
+            name="Owner", value=f"{ctx.guild.owner.name}#{ctx.guild.owner.discriminator}", inline=True)
         info.add_field(name="Channel Categories",
                        value=len(ctx.guild.categories))
         info.add_field(name="Text Channels",
                        value=len(ctx.guild.text_channels), inline=True)
-        info.add_field(name="Voice Channels", value=len(ctx.guild.voice_channels))
-        info.add_field(name="Members", value=len([m for m in ctx.guild.members if not m.bot]))
-        info.add_field(name="Bots", value=len([m for m in ctx.guild.members if not m.bot]))
+        info.add_field(name="Voice Channels",
+                       value=len(ctx.guild.voice_channels))
+        info.add_field(name="Members", value=len(
+            [m for m in ctx.guild.members if not m.bot]))
+        info.add_field(name="Bots", value=len(
+            [m for m in ctx.guild.members if not m.bot]))
         info.add_field(name="Roles", value=len(ctx.guild.roles))
-        info.add_field(name="Role list", value=", ".join([str(r.name) for r in ctx.guild.roles]), inline=False)
+        info.add_field(name="Role list", value=", ".join(
+            [str(r.name) for r in ctx.guild.roles]), inline=False)
         info.set_thumbnail(url=ctx.guild.icon_url)
-        info.set_footer(text=f'ID: {ctx.guild.id} | Created on {ctx.guild.created_at.strftime("%a, %b %d, %Y %I:%M %p")}')
+        info.set_footer(
+            text=f'ID: {ctx.guild.id} | Created on {ctx.guild.created_at.strftime("%a, %b %d, %Y %I:%M %p")}')
         await ctx.send(embed=info)
 
-    #get user's avatar
-    @cog_ext.cog_slash(name="avatar", description="Get user's avatar", guild_ids=__GUILD_ID__, 
-    options=[
-               create_option(
-                 name="user",
-                 description="Select user to get avatar",
-                 option_type=6,
-                 required=False)
-    ])
+    # get user's avatar
+    @cog_ext.cog_slash(name="avatar", description="Get user's avatar", guild_ids=__GUILD_ID__,
+                       options=[
+                           create_option(
+                               name="user",
+                               description="Select user to get avatar",
+                               option_type=6,
+                               required=False)
+                       ])
     async def command_avatar(self, ctx: SlashContext, user=None):
         "Returns the avatar of the user"
         if user:
