@@ -7,6 +7,8 @@ Main contributors:
 """
 # ol(
 
+import logging
+import logging.config
 import os
 from gc import set_threshold
 
@@ -46,7 +48,27 @@ async def determine_prefix(bot, message):
     else:
         return default_prefixes
 
-print("""
+# Configure logging here
+
+DEBUG = False
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True,
+})
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s][%(levelname)7s] %(message)s",
+    datefmt="%I:%M.%S%p",
+)
+
+
+logging.getLogger("discord").setLevel(logging.INFO)
+
+logging.warning(f"Current DEBUG mode is {DEBUG}")
+
+logging.info("""
 
 ███╗░░░███╗██╗██╗░░██╗██╗░░░██╗░░░░░░██████╗░░█████╗░████████╗
 ████╗░████║██║██║░██╔╝██║░░░██║░░░░░░██╔══██╗██╔══██╗╚══██╔══╝
@@ -70,7 +92,8 @@ slash = SlashCommand(client, sync_commands=True)
 @client.event
 async def on_ready():
     "Function to determine what commands are to be if bot is connected to Discord"
-    print(f"logged in as {client.user.name}#{client.user.discriminator}")
+    logging.info(
+        f"logged in as {client.user.name}#{client.user.discriminator}")
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
     await STDOUT_CHANNEL.send(f"Prototype {__version__} Online.")
 
@@ -186,19 +209,19 @@ command_modules = [
 ]
 
 if command_modules:
-    print("Importing cogs. Please stand by...")
-    print(
+    logging.info("Importing cogs. Please stand by...")
+    logging.info(
         f"Importing {len(command_modules)} cogs: {', '.join(command_modules)}")
 else:
-    print("Could not import any cogs!")
+    logging.info("Could not import any cogs!")
 
 # dynamically load all cogs found in cogs/ as cog extensions
 for module in command_modules:
     try:
         client.load_extension("cogs." + module)
     except Exception as e:
-        print(f"Could not import cog {module}: \n{e}")
+        logging.info(f"Could not import cog {module}: \n{e}")
 
-print(f"Cogs imported: {', '.join(command_modules)}")
+logging.info(f"Cogs imported: {', '.join(command_modules)}")
 
 client.run(TOKEN)
