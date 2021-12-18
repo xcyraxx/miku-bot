@@ -87,6 +87,8 @@ class Music(commands.Cog):
     async def command_join(self, ctx):
         "Join a Voice Channel if the author is present in one, else raise error if they aren't"
 
+        logger.info(f"{ctx.author} executed join")
+
         if ctx.author.voice is None:
             await ctx.send("You're not connected to a Voice Channel.")
         else:
@@ -94,9 +96,11 @@ class Music(commands.Cog):
 
             if ctx.voice_client is None:
                 self.vc = await voice_channel.connect()
+                logger.info(f"{ctx.author} made Miku join {voice_channel}")
                 await ctx.send(f"`Connected to `<#{ctx.author.voice.channel.id}>")
             else:
                 self.vc = await ctx.voice_client.move_to(voice_channel)
+                logger.info(f"{ctx.author} made Miku switch to {voice_channel}")
                 await ctx.send(f"`Switched to `<#{ctx.author.voice.channel.id}>")
 
     @cog_ext.cog_slash(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
@@ -105,6 +109,7 @@ class Music(commands.Cog):
 
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
+            logger.info(f"{ctx.author} made Miku leave")
             await ctx.send("https://tenor.com/view/aight-imma-head-out-im-out-this-bitch-bye-gif-15194343")
         else:
             await ctx.send("I'm not connected to Voice Channel.")
@@ -202,6 +207,7 @@ class Music(commands.Cog):
                             brr, source, thumb_url, dur, auth, url]
 
                         await serchbed.edit(embed=playing)
+                        logger.info(f"{ctx.author} played {brr}")
             else:
                 await ctx.send("You're not connected to a voice channel.")
         else:
@@ -216,6 +222,7 @@ class Music(commands.Cog):
             if ctx.voice_client:
                 if ctx.voice_client.is_playing():
                     ctx.voice_client.pause()
+                    logger.info(f"{ctx.author} paused the music")
                     await ctx.send("Paused ⏸️")
                 else:
                     await ctx.send("Nothing is playing")
@@ -240,6 +247,7 @@ class Music(commands.Cog):
                 title="Now Playing",
                 description=f"🎶{brr}\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
             new.set_thumbnail(url=thumb_url)
+            logger.info(f"{ctx.author} skipped the music")
             await ctx.send("Skipped⏩", embed=new)
 
     @cog_ext.cog_slash(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
@@ -248,6 +256,7 @@ class Music(commands.Cog):
 
         if ctx.voice_client:
             ctx.voice_client.resume()
+            logger.info(f"{ctx.author} resumed the music")
             await ctx.send("Resumed ▶️")
         else:
             await ctx.send("There isn't anything to resume.")
@@ -258,6 +267,7 @@ class Music(commands.Cog):
 
         if ctx.voice_client:
             ctx.voice_client.stop()
+            logger.info(f"{ctx.author} stopped the music")
             await ctx.send("Stopped ⏹️")
         else:
             await ctx.send("There isn't anything to stop.")
@@ -265,6 +275,7 @@ class Music(commands.Cog):
     @cog_ext.cog_slash(name="clear", description="Clear the current queue.", guild_ids=__GUILD_ID__)
     async def _clear(self, ctx):
         self.queue.clear()
+        logger.info(f"{ctx.author} cleared the queue")
         await ctx.send("Queue cleared.")
 
     # queue command
@@ -286,6 +297,7 @@ class Music(commands.Cog):
             embed.set_thumbnail(url=self.client.user.avatar_url)
             embed.set_footer(
                 text=f"{len(self.queue)} songs in queue. | use /skip to skip songs")
+            logger.info(f"{ctx.author} requested the queue")
             await ctx.send(embed=embed)
 
     # command to get lyrics from genius
@@ -330,6 +342,7 @@ class Music(commands.Cog):
             embed.set_thumbnail(url=thumbnail)
             embed.set_footer(
                 text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
+            logger.info(f"{ctx.author} requested the lyrics for {song.full_title}")
             await ctx.send(embed=embed)
         else:
             e = discord.Embed(
@@ -338,6 +351,7 @@ class Music(commands.Cog):
             e.set_thumbnail(url=thumbnail)
             e.set_footer(
                 text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
+            logger.info(f"{ctx.author} requested the lyrics for {song.full_title}")
             await ctx.send(embed=e)
 
 

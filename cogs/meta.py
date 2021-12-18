@@ -43,6 +43,8 @@ class Meta(commands.Cog):
     async def command_botinfo(self, ctx: SlashContext):
         "Returns information about the bot"
 
+        logger.info(f"{ctx.author} executed botinfo")
+
         SKYASCII = ctx.guild.get_member(614053918867062785)
         ADIL = ctx.guild.get_member(613789929134227465)
         MARSH = ctx.guild.get_member(614058101347188737)
