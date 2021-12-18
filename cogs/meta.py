@@ -3,7 +3,6 @@ Meta commands for the Miku bot
 """
 
 import datetime
-import logging
 import time
 from typing import Text
 
@@ -17,8 +16,11 @@ from discord_slash.utils.manage_components import (create_actionrow,
                                                    create_select,
                                                    create_select_option)
 
+from utils import logutil
+
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
-# this is very important for creating a cog
+
+logger = logutil.init()
 
 
 class Meta(commands.Cog):
@@ -33,7 +35,7 @@ class Meta(commands.Cog):
     async def on_ready(self):
         "Function to determine what commands are to be if bot is connected to Discord"
 
-        logging.info("Meta up!")
+        logger.info("Meta up!")
         global startTime
         startTime = time.time()
 

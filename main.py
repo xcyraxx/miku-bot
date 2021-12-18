@@ -7,8 +7,6 @@ Main contributors:
 """
 # ol(
 
-import logging
-import logging.config
 import os
 from gc import set_threshold
 
@@ -25,7 +23,10 @@ from discord_slash.utils.manage_components import (ComponentContext,
                                                    wait_for_component)
 from dotenv import load_dotenv
 
+from utils import logutil
+
 load_dotenv()
+
 TOKEN = os.environ.get("TOKEN")
 
 __version__ = "1.3.0"
@@ -48,27 +49,11 @@ async def determine_prefix(bot, message):
     else:
         return default_prefixes
 
-# Configure logging here
+logger = logutil.init()
 
-DEBUG = False
+logger.warning(f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}")
 
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': True,
-})
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(asctime)s][%(levelname)7s] %(message)s",
-    datefmt="%I:%M.%S%p",
-)
-
-
-logging.getLogger("discord").setLevel(logging.INFO)
-
-logging.warning(f"Current DEBUG mode is {DEBUG}")
-
-logging.info("""
+logger.info("""
 
 ███╗░░░███╗██╗██╗░░██╗██╗░░░██╗░░░░░░██████╗░░█████╗░████████╗
 ████╗░████║██║██║░██╔╝██║░░░██║░░░░░░██╔══██╗██╔══██╗╚══██╔══╝
@@ -92,8 +77,8 @@ slash = SlashCommand(client, sync_commands=True)
 @client.event
 async def on_ready():
     "Function to determine what commands are to be if bot is connected to Discord"
-    logging.info(
-        f"logged in as {client.user.name}#{client.user.discriminator}")
+    logger.info(
+        f"Logged in as {client.user.name}#{client.user.discriminator}")
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
     await STDOUT_CHANNEL.send(f"Prototype {__version__} Online.")
 
@@ -209,19 +194,19 @@ command_modules = [
 ]
 
 if command_modules:
-    logging.info("Importing cogs. Please stand by...")
-    logging.info(
+    logger.info("Importing cogs. Please stand by...")
+    logger.info(
         f"Importing {len(command_modules)} cogs: {', '.join(command_modules)}")
 else:
-    logging.info("Could not import any cogs!")
+    logger.info("Could not import any cogs!")
 
 # dynamically load all cogs found in cogs/ as cog extensions
 for module in command_modules:
     try:
         client.load_extension("cogs." + module)
     except Exception as e:
-        logging.info(f"Could not import cog {module}: \n{e}")
+        logger.info(f"Could not import cog {module}: \n{e}")
 
-logging.info(f"Cogs imported: {', '.join(command_modules)}")
+logger.info(f"Cogs imported: {', '.join(command_modules)}")
 
 client.run(TOKEN)

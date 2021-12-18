@@ -5,7 +5,6 @@ Main contributors:
     @savioxavier, @xcyraxx, @UndriveAssassin
 """
 
-import logging
 import datetime as dt
 import os
 import re
@@ -27,8 +26,12 @@ from discord_slash.utils.manage_commands import create_option
 from lyricsgenius import Genius
 from validators.url import url
 
+from utils import logutil
+
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
 PREFIX = os.environ.get("PREFIX")
+
+logger = logutil.init()
 
 
 class Music(commands.Cog):
@@ -54,7 +57,7 @@ class Music(commands.Cog):
     async def on_ready(self):
         "Function to determine what commands are to be if bot is connected to Discord"
 
-        logging.info("Music up!")
+        logger.info("Music up!")
 
     def play_next(self):
         if len(self.queue) > 0:
