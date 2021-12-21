@@ -136,6 +136,7 @@ class Music(commands.Cog):
                 a = "bad"  # bad way i know
             else:
                 voice_channel = ctx.author.voice.channel
+                logger.info(f"{ctx.author} made Miku join {voice_channel}")
                 self.vc = await voice_channel.connect()
             if a != "bad":
                 searching = discord.Embed(
@@ -194,6 +195,7 @@ class Music(commands.Cog):
                             timestamp=ctx.message.created_at
                         )
                         queued.set_thumbnail(url=thumb_url)
+                        logger.info(f"{ctx.author} added '{brr}' to queue")
                         await serchbed.edit(embed=queued)
                     else:
                         playing = discord.Embed(
@@ -207,7 +209,7 @@ class Music(commands.Cog):
                             brr, source, thumb_url, dur, auth, url]
 
                         await serchbed.edit(embed=playing)
-                        logger.info(f"{ctx.author} played {brr}")
+                        logger.info(f"{ctx.author} played '{brr}'")
             else:
                 await ctx.send("You're not connected to a voice channel.")
         else:
@@ -218,16 +220,15 @@ class Music(commands.Cog):
     @cog_ext.cog_slash(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
     async def _pause(self, ctx):
         "Pause music"
-        with ctx.typing():
-            if ctx.voice_client:
-                if ctx.voice_client.is_playing():
-                    ctx.voice_client.pause()
-                    logger.info(f"{ctx.author} paused the music")
-                    await ctx.send("Paused ⏸️")
-                else:
-                    await ctx.send("Nothing is playing")
+        if ctx.voice_client:
+            if ctx.voice_client.is_playing():
+                ctx.voice_client.pause()
+                logger.info(f"{ctx.author} paused the music")
+                await ctx.send("Paused ⏸️")
             else:
-                await ctx.send("I'm not connected to a voice channel.")
+                await ctx.send("Nothing is playing")
+        else:
+            await ctx.send("I'm not connected to a voice channel.")
 
     @cog_ext.cog_slash(name="skip", description="Skips the current song.", guild_ids=__GUILD_ID__)
     async def _skip(self, ctx):
@@ -296,7 +297,7 @@ class Music(commands.Cog):
             ))
             embed.set_thumbnail(url=self.client.user.avatar_url)
             embed.set_footer(
-                text=f"{len(self.queue)} songs in queue. | use /skip to skip songs")
+                text=f"{len(self.queue)} songs in queue. • use /skip to skip songs")
             logger.info(f"{ctx.author} requested the queue")
             await ctx.send(embed=embed)
 
@@ -342,7 +343,7 @@ class Music(commands.Cog):
             embed.set_thumbnail(url=thumbnail)
             embed.set_footer(
                 text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
-            logger.info(f"{ctx.author} requested the lyrics for {song.full_title}")
+            logger.info(f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.send(embed=embed)
         else:
             e = discord.Embed(
@@ -351,7 +352,7 @@ class Music(commands.Cog):
             e.set_thumbnail(url=thumbnail)
             e.set_footer(
                 text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
-            logger.info(f"{ctx.author} requested the lyrics for {song.full_title}")
+            logger.info(f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.send(embed=e)
 
 
