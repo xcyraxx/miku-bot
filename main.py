@@ -51,7 +51,8 @@ async def determine_prefix(bot, message):
 
 logger = logutil.init()
 
-logger.warning(f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}")
+logger.warning(
+    f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}")
 
 logger.info("""
 

@@ -100,7 +100,8 @@ class Music(commands.Cog):
                 await ctx.send(f"`Connected to `<#{ctx.author.voice.channel.id}>")
             else:
                 self.vc = await ctx.voice_client.move_to(voice_channel)
-                logger.info(f"{ctx.author} made Miku switch to {voice_channel}")
+                logger.info(
+                    f"{ctx.author} made Miku switch to {voice_channel}")
                 await ctx.send(f"`Switched to `<#{ctx.author.voice.channel.id}>")
 
     @cog_ext.cog_slash(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
@@ -343,7 +344,8 @@ class Music(commands.Cog):
             embed.set_thumbnail(url=thumbnail)
             embed.set_footer(
                 text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
-            logger.info(f"{ctx.author} requested the lyrics for '{song.full_title}'")
+            logger.info(
+                f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.send(embed=embed)
         else:
             e = discord.Embed(
@@ -352,7 +354,8 @@ class Music(commands.Cog):
             e.set_thumbnail(url=thumbnail)
             e.set_footer(
                 text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
-            logger.info(f"{ctx.author} requested the lyrics for '{song.full_title}'")
+            logger.info(
+                f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.send(embed=e)
 
 
