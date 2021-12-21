@@ -28,8 +28,9 @@ from validators.url import url
 
 from utils import logutil
 
+GENIUS_TOKEN = os.environ.get("GENIUS_TOKEN")
+
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
-PREFIX = os.environ.get("PREFIX")
 
 logger = logutil.init()
 
@@ -50,7 +51,7 @@ class Music(commands.Cog):
         self.queue = []
         self.vc = ""
         self.current_song = []
-        self.GENIUS_TOKEN = "BZDhGkSxGrYjp4ljfm4NaTbWPe15Ll3lHVlSwFeKuOxj-YdmwLTj4C6j8ULojoh6"
+        self.GENIUS_TOKEN = GENIUS_TOKEN
         self.genius = Genius(self.GENIUS_TOKEN)
 
     @Cog.listener()
