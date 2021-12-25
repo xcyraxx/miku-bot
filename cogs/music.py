@@ -31,7 +31,8 @@ from utils import logutil
 logger = logutil.init()
 __GUILD_ID__ = []
 for i in open("./utils/guilds.txt", "r").read().split("\n"):
-    __GUILD_ID__.append(int(i.replace("'", "")))
+    if i:
+        __GUILD_ID__.append(int(i.replace("'", "")))
 PREFIX = os.environ.get("PREFIX")
 
 class Music(commands.Cog):

@@ -32,7 +32,8 @@ load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 __GUILD_ID__ = []
 for i in open("utils/guilds.txt", "r").read().split("\n"):
-    __GUILD_ID__.append(int(i.replace("'", "")))
+    if i:
+        __GUILD_ID__.append(int(i.replace("'", "")))
 
 __version__ = "1.3.0"
 
@@ -89,20 +90,18 @@ async def on_guild_join(guild):
     logger.info(f"Joined guild {guild.name}")
     await STDOUT_CHANNEL.send(f"Joined guild `{guild.name}`\nTotal Guilds: {len(client.guilds)}")
     open("utils/guilds.txt", "a").write(f"\n{guild.id}")
-    try:
-      for module in command_modules:
-        client.reload_extension(f"cogs.{module}")
-        logger.info(f"Reloaded extension {module}")
-    except Exception as e:
-        logger.error(f"Failed to reload extension: {e}")
+    await client.close()
+    os.system("python3 main.py")
 
 @client.command()
 async def reload(ctx, module):
     try:
         client.reload_extension(f"cogs.{module}")
         logger.info(f"Reloaded extension {module}")
+        await ctx.send(f"Reloaded extension {module}")
     except Exception as e:
         logger.error(f"Failed to reload extension: {e}")
+        await ctx.send(f"Failed to reload extension: {e}")
 
 
 @client.event

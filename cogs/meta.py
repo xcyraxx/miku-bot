@@ -20,7 +20,8 @@ from utils import logutil
 
 __GUILD_ID__ = []
 for i in open("./utils/guilds.txt", "r").read().split("\n"):
-    __GUILD_ID__.append(int(i.replace("'", "")))
+    if i:
+        __GUILD_ID__.append(int(i.replace("'", "")))
 
 logger = logutil.init()
 
