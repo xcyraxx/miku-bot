@@ -9,12 +9,15 @@ Main contributors:
 
 import os
 from gc import set_threshold
-
+import json
 import discord
+from discord import guild
 from discord.enums import Status
 from discord.ext import commands
 from discord.ext.commands import bot
+from discord.ext.commands.converter import clean_content
 from discord_slash import SlashCommand
+import discord_slash
 from discord_slash.model import ButtonStyle
 from discord_slash.utils.manage_components import (ComponentContext,
                                                    create_actionrow,
@@ -24,13 +27,14 @@ from discord_slash.utils.manage_components import (ComponentContext,
 from dotenv import load_dotenv
 
 from utils import logutil
-
 load_dotenv()
 
 TOKEN = os.environ.get("TOKEN")
+__GUILD_ID__ = []
+for i in open("utils/guilds.txt", "r").read().split("\n"):
+    __GUILD_ID__.append(int(i.replace("'", "")))
 
 __version__ = "1.3.0"
-__GUILD_ID__ = [846609621429780520, 893122121805496371]
 
 custom_prefixes = {}
 default_prefixes = [">>"]
@@ -50,7 +54,6 @@ async def determine_prefix(bot, message):
         return default_prefixes
 
 logger = logutil.init()
-
 logger.warning(
     f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}")
 
@@ -77,12 +80,60 @@ slash = SlashCommand(client, sync_commands=True)
 
 @client.event
 async def on_ready():
-    "Function to determine what commands are to be if bot is connected to Discord"
+    global STDOUT_CHANNEL
+    STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
+    await STDOUT_CHANNEL.send(f"Miku {__version__} Online.")
+
+@client.event
+async def on_guild_join(guild):
+    logger.info(f"Joined guild {guild.name}")
+    await STDOUT_CHANNEL.send(f"Joined guild `{guild.name}`\nTotal Guilds: {len(client.guilds)}")
+    open("utils/guilds.txt", "a").write(f"\n{guild.id}")
+    try:
+      for module in command_modules:
+        client.reload_extension(f"cogs.{module}")
+        logger.info(f"Reloaded extension {module}")
+    except Exception as e:
+        logger.error(f"Failed to reload extension: {e}")
+
+@client.command()
+async def reload(ctx, module):
+    try:
+        client.reload_extension(f"cogs.{module}")
+        logger.info(f"Reloaded extension {module}")
+    except Exception as e:
+        logger.error(f"Failed to reload extension: {e}")
+
+
+@client.event
+async def on_guild_remove(guild):
+    logger.info(f"Left guild {guild.name}")
+    await STDOUT_CHANNEL.send(f"Left guild `{guild.name}`\nTotal Guilds: {len(client.guilds)}")
+    with open("utils/guilds.txt", "r") as f:
+        lines = f.readlines()
+    with open("utils/guilds.txt", "w") as f:
+        for line in lines:
+            if line.strip("\n") != str(guild.id):
+                f.write(line)
+
+
+@client.event
+async def on_disconnect():
+    logger.info("Disconnected from Discord")
+    await STDOUT_CHANNEL.send(f"Disconnected from Discord")
+
+@client.event
+async def on_connect():
+    logger.info("Connected to Discord")
     logger.info(
         f"Logged in as {client.user.name}#{client.user.discriminator}")
-    STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
-    await STDOUT_CHANNEL.send(f"Prototype {__version__} Online.")
 
+#owner only commands
+@client.command()
+@commands.is_owner()
+async def shutdown(ctx):
+    await ctx.send("Shutting down...")
+    await client.close()
 
 @client.command()
 @commands.guild_only()
@@ -121,7 +172,7 @@ MUSIC_HELP = """
     Leave the vc.
 
 **`queue`**:
-    Display the current queue(Is very shit rn, im working on it).
+    Display the current queue.
 
 """
 
@@ -163,7 +214,7 @@ async def _help(ctx):
     action_row = create_actionrow(select)
     bot_help = discord.Embed(
         title="Miku Help",
-        description="Select Category for commands.",
+        description=f"Select Category for commands.",
         color=discord.Color.from_rgb(3, 252, 252))
     await ctx.send(embed=bot_help, components=[action_row])
 
@@ -172,12 +223,12 @@ async def _help(ctx):
 async def on_component(ctx: ComponentContext):
     # ctx.selected_options is a list of all the values the user selected
     music = discord.Embed(
-        title="Miku Help",
+        title="Music Commands",
         description=MUSIC_HELP,
         color=discord.Color.from_rgb(3, 252, 252)
     )
     sets = discord.Embed(
-        title="Miku Help",
+        title="Other Commands",
         description=OTHER_HELP,
         color=discord.Color.from_rgb(3, 252, 252)
     )

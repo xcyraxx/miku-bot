@@ -18,7 +18,9 @@ from discord_slash.utils.manage_components import (create_actionrow,
 
 from utils import logutil
 
-__GUILD_ID__ = [846609621429780520, 893122121805496371]
+__GUILD_ID__ = []
+for i in open("./utils/guilds.txt", "r").read().split("\n"):
+    __GUILD_ID__.append(int(i.replace("'", "")))
 
 logger = logutil.init()
 
