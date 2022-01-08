@@ -101,19 +101,24 @@ class Music(commands.Cog):
                 self.vc = await ctx.voice_client.move_to(voice_channel)
                 await ctx.send(f"`Switched to `<#{ctx.author.voice.channel.id}>")
 
-    @cog_ext.cog_slash(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
     async def command_leave(self, ctx):
         "Leave a voice if the bot is connected to a Voice Channel, else raise error if it isn't"
 
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
-            await ctx.send("https://tenor.com/view/aight-imma-head-out-im-out-this-bitch-bye-gif-15194343")
+            await ctx.send("https://tenor.com/view/aight-imma-head-out-im-out-this-bitch-bye-gif-15194343", delete_after=1.8)
         else:
             await ctx.send("I'm not connected to Voice Channel.")
 
-    # FIX: Low quality code
-    @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
-    async def command_play(self, ctx, song_name: str):
+    @cog_ext.cog_slash(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
+    async def _slash_leave(self, ctx):
+        await self.command_leave(ctx)
+
+    @commands.command(name="leave")
+    async def _reg_leave(self, ctx):
+        await self.command_leave(ctx)
+
+    async def command_play(self, ctx, song_name: str = None):
         """Play a YouTube video using the youtube_dl library
 
         Args:
@@ -210,6 +215,15 @@ class Music(commands.Cog):
             await ctx.send(
                 'Provide a name or a link to play the song. Usage: `/play song name`'
             )
+
+    # FIX: Low quality code
+    @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
+    async def _slash_leave(self, ctx, song_name: str):
+        await self.command_play(ctx, song_name)
+
+    @commands.command(name="play")
+    async def _reg_play(self, ctx, song_name: str):
+        await self.command_play(ctx, song_name)
 
     @cog_ext.cog_slash(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
     async def _pause(self, ctx):

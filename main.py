@@ -68,7 +68,7 @@ logger.info("""
 ╚═╝░░░░░╚═╝╚═╝╚═╝░░╚═╝░╚═════╝░░░░░░░╚═════╝░░╚════╝░░░░╚═╝░░░
 """)
 
-activity = discord.Game(name=">>help")
+activity = discord.Game(name=">>help • /help")
 client = commands.Bot(command_prefix=determine_prefix,
                       case_insensitive=True,
                       activity=activity,
