@@ -354,6 +354,27 @@ class Music(commands.Cog):
             e.set_footer(text=f"Requested by {ctx.author.name} | Artist: {song.artist}")
             await ctx.send(embed=e)
 
+    @commands.Cog.listener()
+    async def on_error(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            await ctx.send(f"Error: {error.original}")
+        elif isinstance(error, commands.CommandNotFound):
+            pass
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Error: Missing required argument {error.param}")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send(f"Error: Bad argument {error.param}")
+        elif isinstance(error, commands.CheckFailure):
+            await ctx.send(f"Error: {error.__class__.__name__}")
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"Error: {error.retry_after}")
+        elif isinstance(error, commands.CommandError):
+            await ctx.send(f"Error: {error.__class__.__name__}")
+        elif isinstance(error, commands.MissingPermissions):
+            await ctx.send(f"Error: Missing permissions {error.missing_perms}")
+        else:
+            await ctx.send(f"Error: {error}")
+
 def setup(bot):
     "Setup command for the bot"
 

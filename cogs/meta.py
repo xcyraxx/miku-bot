@@ -2,10 +2,12 @@
 Meta commands for the Miku bot
 """
 
+import asyncio
 import datetime
 import time
 from typing import Text
-
+from faker import Faker
+from faker.providers import internet, user_agent
 import discord
 from discord.enums import ChannelType
 from discord.ext import commands
@@ -17,14 +19,17 @@ from discord_slash.utils.manage_components import (create_actionrow,
                                                    create_select_option)
 
 from utils import logutil
-
+from random import choice
+cards = ['visa', 'mastercard', 'discover', 'amex', 'jcb', 'diners', 'visa16']
 __GUILD_ID__ = []
 for i in open("./utils/guilds.txt", "r").read().split("\n"):
     if i:
         __GUILD_ID__.append(int(i.replace("'", "")))
 
 logger = logutil.init()
-
+fake = Faker()
+fake.add_provider(internet)
+fake.add_provider(user_agent)
 
 class Meta(commands.Cog):
     "Python class that handles all meta commands"
@@ -132,6 +137,88 @@ class Meta(commands.Cog):
         info.set_footer(text=f'ID: {user.id}')
         await ctx.send(embed=info)
 
+    @cog_ext.cog_slash(name="hack", description="Very real hacking", guild_ids=__GUILD_ID__,
+    options=[
+        create_option(
+            name="user",
+            description="Select user to hack",
+            option_type=6,
+            required=True)
+    ])
+    async def command_hack(self, ctx: SlashContext, user: discord.Member):
+        msg = await ctx.send(f"Initiating hack on {user.display_name}. Please wait...")
+        await asyncio.sleep(1)
+        await msg.edit(content="Getting user's IP address")
+        await asyncio.sleep(0.25)
+        await msg.edit(content=f"{fake.ipv4_private()}")
+        await asyncio.sleep(0.5)
+        await msg.edit(content="Getting user's email id and discord password")
+        await asyncio.sleep(0.25)
+        await msg.edit(content=f"Email: {fake.free_email}\nPassword: {fake.password()}")
+        await asyncio.sleep(0.5)
+        await msg.edit(content="Locating user")
+        await asyncio.sleep(0.25)
+        await msg.edit(content=f"{fake.address()}")
+        await asyncio.sleep(0.5)
+        await msg.edit(content="Grabbing user's phone number")
+        await asyncio.sleep(0.25)
+        await msg.edit(content=f"{fake.phone_number()}")
+        await asyncio.sleep(0.5)
+        await msg.edit(content="Logging user's User Agent")
+        await asyncio.sleep(0.25)
+        await msg.edit(content=f"{fake.user_agent()}")
+        await asyncio.sleep(0.5)
+        await msg.edit(content="Stealing credit card information")
+        await asyncio.sleep(0.25)
+        await msg.edit(content=f"{fake.credit_card_full(card_type=choice(cards))}")
+        await asyncio.sleep(0.5)
+        await msg.edit(content="Hacking Steam account")
+        await asyncio.sleep(0.25)
+        await msg.edit(content=f"{fake.user_name()}")
+        await asyncio.sleep(0.5)
+        await msg.edit(content="Hack Completed")
+        em = discord.Embed(
+            title="Hacked Information",
+            description=f"**IP Address**: {fake.ipv4_private()}\n**Email**: {fake.email(domain='gmail.com')}\n**Password**: {fake.password()}\n**Address**: {fake.address()}\n**Phone Number**: {fake.phone_number()}\n**User Agent**: {fake.user_agent()}\n**Credit Card Info**: {fake.credit_card_full(card_type=choice(cards))}",
+            color=discord.Color.from_rgb(3, 252, 252)
+        )
+        em.set_thumbnail(url=user.avatar_url)
+        em.set_footer(text="source: trust me bro")
+        await msg.edit(embed=em)
+
+
+    async def _ping(self, ctx: SlashContext):
+        "Returns the latency of the bot"
+        await ctx.send(f"Pong! {round(self.client.latency * 1000)}ms")
+        
+    @cog_ext.cog_slash(name="ping", description="Pong!", guild_ids=__GUILD_ID__)
+    async def _slash_ping(self, ctx: SlashContext):
+        await self._ping(ctx)
+
+    @commands.command(name="ping", aliases=["pong"],)
+    async def _reg_ping(self, ctx):
+        await self._ping(ctx)
+
+    @commands.Cog.listener()
+    async def on_error(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            await ctx.send(f"Error: {error.original}")
+        elif isinstance(error, commands.CommandNotFound):
+            pass
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Error: Missing required argument {error.param}")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send(f"Error: Bad argument {error.param}")
+        elif isinstance(error, commands.CheckFailure):
+            await ctx.send(f"Error: {error.__class__.__name__}")
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"Error: {error.retry_after}")
+        elif isinstance(error, commands.CommandError):
+            await ctx.send(f"Error: {error.__class__.__name__}")
+        elif isinstance(error, commands.MissingPermissions):
+            await ctx.send(f"Error: Missing permissions {error.missing_perms}")
+        else:
+            await ctx.send(f"Error: {error}")
 
 def setup(bot):
     "Setup command for the bot"

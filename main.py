@@ -44,16 +44,6 @@ default_prefixes = [">>"]
 intents = discord.Intents.default()
 intents.members = True
 
-
-async def determine_prefix(bot, message):
-    "Determine prefix for the bot"
-
-    guild = message.guild
-    if guild:
-        return custom_prefixes.get(guild.id, default_prefixes)
-    else:
-        return default_prefixes
-
 logger = logutil.init()
 logger.warning(
     f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}")
@@ -69,7 +59,7 @@ logger.info("""
 """)
 
 activity = discord.Game(name=">>help • /help")
-client = commands.Bot(command_prefix=determine_prefix,
+client = commands.Bot(command_prefix=">>",
                       case_insensitive=True,
                       activity=activity,
                       intents=intents,
@@ -182,22 +172,23 @@ OTHER_HELP = """
     Set a custom prefix for the Bot.
 **`avatar`**:
     Get your own/another user's avatar.
+**`ping`**:
+    Check the latency of the bot.
+**`hack`**:
+    Totally real hack command.
 """
 
 
 # help command
 @client.command(name="help", description="List commands")
 async def command_help(ctx):
-    "Main help command for the bot"
-    bot_help = discord.Embed(
-        title="Miku Help",
-        description=MAIN_HELP,
-        color=discord.Color.from_rgb(3, 252, 252))
-    bot_help.set_thumbnail(url=client.user.avatar_url)
-    await ctx.send(embed=bot_help)
+    await _help(ctx)
 
 
 @slash.slash(name="help", guild_ids=__GUILD_ID__, description="list all commands.")
+async def _slash_help(ctx):
+    await _help(ctx)
+
 async def _help(ctx):
     select = create_select(
         options=[  # the options in your dropdown
