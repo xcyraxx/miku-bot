@@ -27,6 +27,8 @@ from discord_slash import SlashCommand, SlashContext, cog_ext
 from validators.url import url
 from utils import logutil
 
+__GUILD_ID__ = [846609621429780520, 893122121805496371]
+PREFIX = os.environ.get("PREFIX")
 
 logger = logutil.init()
 __GUILD_ID__ = []
