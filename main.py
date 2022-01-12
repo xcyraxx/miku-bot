@@ -9,16 +9,12 @@ Main contributors:
 
 import os
 from gc import set_threshold
-import json
+
 import discord
-import platform
-from discord import guild
 from discord.enums import Status
 from discord.ext import commands
 from discord.ext.commands import bot
-from discord.ext.commands.converter import clean_content
 from discord_slash import SlashCommand
-import discord_slash
 from discord_slash.model import ButtonStyle
 from discord_slash.utils.manage_components import (ComponentContext,
                                                    create_actionrow,
@@ -28,15 +24,13 @@ from discord_slash.utils.manage_components import (ComponentContext,
 from dotenv import load_dotenv
 
 from utils import logutil
+
 load_dotenv()
 
 TOKEN = os.environ.get("TOKEN")
-__GUILD_ID__ = []
-for i in open("utils/guilds.txt", "r").read().split("\n"):
-    if i:
-        __GUILD_ID__.append(int(i.replace("'", "")))
 
 __version__ = "1.3.0"
+__GUILD_ID__ = [846609621429780520, 893122121805496371]
 
 custom_prefixes = {}
 default_prefixes = [">>"]
@@ -45,7 +39,18 @@ default_prefixes = [">>"]
 intents = discord.Intents.default()
 intents.members = True
 
+
+async def determine_prefix(bot, message):
+    "Determine prefix for the bot"
+
+    guild = message.guild
+    if guild:
+        return custom_prefixes.get(guild.id, default_prefixes)
+    else:
+        return default_prefixes
+
 logger = logutil.init()
+
 logger.warning(
     f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}")
 
@@ -59,8 +64,8 @@ logger.info("""
 ╚═╝░░░░░╚═╝╚═╝╚═╝░░╚═╝░╚═════╝░░░░░░░╚═════╝░░╚════╝░░░░╚═╝░░░
 """)
 
-activity = discord.Game(name=">>help • /help")
-client = commands.Bot(command_prefix=">>",
+activity = discord.Game(name=">>help")
+client = commands.Bot(command_prefix=determine_prefix,
                       case_insensitive=True,
                       activity=activity,
                       intents=intents,
@@ -72,63 +77,12 @@ slash = SlashCommand(client, sync_commands=True)
 
 @client.event
 async def on_ready():
-    global STDOUT_CHANNEL
-    STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
-    await STDOUT_CHANNEL.send(f"Miku {__version__} Online.")
-
-@client.event
-async def on_guild_join(guild):
-    logger.info(f"Joined guild {guild.name}")
-    await STDOUT_CHANNEL.send(f"Joined guild `{guild.name}`\nTotal Guilds: {len(client.guilds)}")
-    open("utils/guilds.txt", "a").write(f"\n{guild.id}")
-    await client.close()
-    # Run python main.py if Windows, else python3 main.py
-    # TODO: Use subprocess instead of os.system()
-    if platform.system() == "Windows":
-        os.system("python main.py")
-    else:
-        os.system("python3 main.py")
-
-@client.command()
-async def reload(ctx, module):
-    try:
-        client.reload_extension(f"cogs.{module}")
-        logger.info(f"Reloaded extension {module}")
-        await ctx.send(f"Reloaded extension {module}")
-    except Exception as e:
-        logger.error(f"Failed to reload extension: {e}")
-        await ctx.send(f"Failed to reload extension: {e}")
-
-
-@client.event
-async def on_guild_remove(guild):
-    logger.info(f"Left guild {guild.name}")
-    await STDOUT_CHANNEL.send(f"Left guild `{guild.name}`\nTotal Guilds: {len(client.guilds)}")
-    with open("utils/guilds.txt", "r") as f:
-        lines = f.readlines()
-    with open("utils/guilds.txt", "w") as f:
-        for line in lines:
-            if line.strip("\n") != str(guild.id):
-                f.write(line)
-
-
-@client.event
-async def on_disconnect():
-    logger.info("Disconnected from Discord")
-    await STDOUT_CHANNEL.send(f"Disconnected from Discord")
-
-@client.event
-async def on_connect():
-    logger.info("Connected to Discord")
+    "Function to determine what commands are to be if bot is connected to Discord"
     logger.info(
         f"Logged in as {client.user.name}#{client.user.discriminator}")
+    STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
+    await STDOUT_CHANNEL.send(f"Prototype {__version__} Online.")
 
-#owner only commands
-@client.command()
-@commands.is_owner()
-async def shutdown(ctx):
-    await ctx.send("Shutting down...")
-    await client.close()
 
 @client.command()
 @commands.guild_only()
@@ -167,7 +121,7 @@ MUSIC_HELP = """
     Leave the vc.
 
 **`queue`**:
-    Display the current queue.
+    Display the current queue(Is very shit rn, im working on it).
 
 """
 
@@ -178,23 +132,22 @@ OTHER_HELP = """
     Set a custom prefix for the Bot.
 **`avatar`**:
     Get your own/another user's avatar.
-**`ping`**:
-    Check the latency of the bot.
-**`hack`**:
-    Totally real hack command.
 """
 
 
 # help command
 @client.command(name="help", description="List commands")
 async def command_help(ctx):
-    await _help(ctx)
+    "Main help command for the bot"
+    bot_help = discord.Embed(
+        title="Miku Help",
+        description=MAIN_HELP,
+        color=discord.Color.from_rgb(3, 252, 252))
+    bot_help.set_thumbnail(url=client.user.avatar_url)
+    await ctx.send(embed=bot_help)
 
 
 @slash.slash(name="help", guild_ids=__GUILD_ID__, description="list all commands.")
-async def _slash_help(ctx):
-    await _help(ctx)
-
 async def _help(ctx):
     select = create_select(
         options=[  # the options in your dropdown
@@ -210,7 +163,7 @@ async def _help(ctx):
     action_row = create_actionrow(select)
     bot_help = discord.Embed(
         title="Miku Help",
-        description=f"Select Category for commands.",
+        description="Select Category for commands.",
         color=discord.Color.from_rgb(3, 252, 252))
     await ctx.send(embed=bot_help, components=[action_row])
 
@@ -219,12 +172,12 @@ async def _help(ctx):
 async def on_component(ctx: ComponentContext):
     # ctx.selected_options is a list of all the values the user selected
     music = discord.Embed(
-        title="Music Commands",
+        title="Miku Help",
         description=MUSIC_HELP,
         color=discord.Color.from_rgb(3, 252, 252)
     )
     sets = discord.Embed(
-        title="Other Commands",
+        title="Miku Help",
         description=OTHER_HELP,
         color=discord.Color.from_rgb(3, 252, 252)
     )
