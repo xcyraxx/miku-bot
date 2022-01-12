@@ -95,9 +95,6 @@ async def setprefix(ctx, *, prefixes=""):
     custom_prefixes[ctx.guild.id] = prefixes.split() or default_prefixes
     await ctx.send("Prefixes set!")
 
-
-MAIN_HELP = "**Miku** - The only music bot you'll ever need!\nDiscord will only be supporting slash commands soon. Use `/help` for commands."
-
 MUSIC_HELP = """
 **`join`**: 
     Connect the bot your current Voice Channel.
@@ -137,17 +134,14 @@ OTHER_HELP = """
 
 # help command
 @client.command(name="help", description="List commands")
-async def command_help(ctx):
-    "Main help command for the bot"
-    bot_help = discord.Embed(
-        title="Miku Help",
-        description=MAIN_HELP,
-        color=discord.Color.from_rgb(3, 252, 252))
-    bot_help.set_thumbnail(url=client.user.avatar_url)
-    await ctx.send(embed=bot_help)
+async def _reg_help(ctx):
+    await _help(ctx)
 
 
 @slash.slash(name="help", guild_ids=__GUILD_ID__, description="list all commands.")
+async def _slash_help(ctx):
+    await _help(ctx)
+
 async def _help(ctx):
     select = create_select(
         options=[  # the options in your dropdown

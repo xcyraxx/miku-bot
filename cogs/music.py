@@ -13,12 +13,11 @@ import urllib.request
 from typing import Text
 
 import discord
+from discord.ext.commands.core import command
 import pafy
 import requests
 import validators
 import youtube_dl
-from bs4 import BeautifulSoup
-from discord import voice_client
 from discord.ext import commands
 from discord.ext.commands import Cog
 from discord_slash import SlashCommand, SlashContext, cog_ext
@@ -56,7 +55,7 @@ class Music(commands.Cog):
     @Cog.listener()
     async def on_ready(self):
         "Function to determine what commands are to be if bot is connected to Discord"
-
+        self.tick = self.client.get_emoji(930836902347694081)
         logger.info("Music up!")
 
     def play_next(self):
@@ -84,40 +83,68 @@ class Music(commands.Cog):
             self.is_playing = False
 
     @cog_ext.cog_slash(name="join", description="Join your current voice channel", guild_ids=__GUILD_ID__)
-    async def command_join(self, ctx):
+    async def _slash_join(self, ctx):
+        await self._join(ctx)
+
+    @commands.command(name="join", aliases=["j"], help="Join your current voice channel")
+    async def _reg_join(self, ctx):
+        "Join your current voice channel"
+        await self._join(ctx)
+
+    async def _join(self, ctx):
         "Join a Voice Channel if the author is present in one, else raise error if they aren't"
+        try:
+            auth = ctx.author
+        except AttributeError:
+            auth = ctx.message.author
 
-        logger.info(f"{ctx.author} executed join")
+        logger.info(f"{auth} executed join")
 
-        if ctx.author.voice is None:
+        if auth.voice is None:
             await ctx.send("You're not connected to a Voice Channel.")
         else:
-            voice_channel = ctx.author.voice.channel
+            voice_channel = auth.voice.channel
 
             if ctx.voice_client is None:
                 self.vc = await voice_channel.connect()
-                logger.info(f"{ctx.author} made Miku join {voice_channel}")
-                await ctx.send(f"`Connected to `<#{ctx.author.voice.channel.id}>")
+                logger.info(f"{auth} made Miku join {voice_channel}")
+                await ctx.send(f"`Connected to `<#{auth.voice.channel.id}>")
             else:
                 self.vc = await ctx.voice_client.move_to(voice_channel)
                 logger.info(
-                    f"{ctx.author} made Miku switch to {voice_channel}")
-                await ctx.send(f"`Switched to `<#{ctx.author.voice.channel.id}>")
+                    f"{auth} made Miku switch to {voice_channel}")
+                await ctx.send(f"`Switched to `<#{auth.voice.channel.id}>")
 
     @cog_ext.cog_slash(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
-    async def command_leave(self, ctx):
+    async def _slash_leave(self, ctx):
         "Leave a voice if the bot is connected to a Voice Channel, else raise error if it isn't"
 
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
             logger.info(f"{ctx.author} made Miku leave")
-            await ctx.send("https://tenor.com/view/aight-imma-head-out-im-out-this-bitch-bye-gif-15194343")
+            await ctx.send(f"{self.tick}")
         else:
             await ctx.send("I'm not connected to Voice Channel.")
 
+    @commands.command(name="leave", aliases=[""], help="Disconnects the bot.")
+    async def _reg_leave(self, ctx):
+        "Disconnects the bot."
+        if ctx.voice_client:
+            await ctx.voice_client.disconnect()
+            logger.info(f"{ctx.author} made Miku leave")
+            await ctx.send("Disconnected from Voice Channel.")
+        else:
+            await ctx.send("I'm not connected to a voice channel.")
     # FIX: Low quality code
     @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
-    async def command_play(self, ctx, song_name: str):
+    async def _slash_play(self, ctx, song_name: str):
+        await self._play(ctx, song_name)
+
+    @commands.command(name="play", description="Play any song by name", aliases=["p"])
+    async def _reg_play(self, ctx, song_name: str):
+        await self._play(ctx, song_name)
+
+    async def _play(self, ctx, song_name):
         """Play a YouTube video using the youtube_dl library
 
         Args:
@@ -219,12 +246,22 @@ class Music(commands.Cog):
             )
 
     @cog_ext.cog_slash(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
+    async def _slash_pause(self, ctx):
+        await self._pause(ctx)
+
+    @commands.command(name="pause", description="Pause the current song.")
+    async def _reg_pause(self, ctx):
+        await self._pause(ctx)
+
     async def _pause(self, ctx):
         "Pause music"
         if ctx.voice_client:
             if ctx.voice_client.is_playing():
                 ctx.voice_client.pause()
-                logger.info(f"{ctx.author} paused the music")
+                try:
+                    logger.info(f"{ctx.author} paused the music.")
+                except AttributeError:
+                    logger.info(f"{ctx.message.author} paused the music.")
                 await ctx.send("Paused ⏸️")
             else:
                 await ctx.send("Nothing is playing")
@@ -232,11 +269,18 @@ class Music(commands.Cog):
             await ctx.send("I'm not connected to a voice channel.")
 
     @cog_ext.cog_slash(name="skip", description="Skips the current song.", guild_ids=__GUILD_ID__)
+    async def _slash_skip(self, ctx):
+        await self._skip(ctx)
+
+    @commands.command(name="skip", aliases=["s"], description="Skips the current song.")
+    async def _reg_skip(self, ctx):
+        await self._skip(ctx)
+
     async def _skip(self, ctx):
         if ctx.voice_client.is_playing():
             ctx.voice_client.stop()
         else:
-            await ctx.send("A library is louder than the vc rn-")
+            await ctx.send(".-. I'm not playing anything~")
         if len(self.queue) <= 0:
             await ctx.send("The Queue is empty")
         else:
@@ -245,46 +289,89 @@ class Music(commands.Cog):
             thumb_url = self.queue[0][2]
             # try to play next in the queue if it exists
             await self.play_music()
+            try:
+                auth = ctx.author.mention
+            except AttributeError:
+                auth = ctx.message.author.mention
             new = discord.Embed(
                 title="Now Playing",
-                description=f"🎶{brr}\n`[00:00:00/{dur}]`\n\nRequested by: {ctx.author.mention}", color=discord.Color.from_rgb(3, 252, 252))
+                description=f"🎶{brr}\n`[00:00:00/{dur}]`\n\nRequested by: {auth}",
+                color=discord.Color.from_rgb(3, 252, 252))
             new.set_thumbnail(url=thumb_url)
-            logger.info(f"{ctx.author} skipped the music")
+            logger.info(f"{auth} skipped the music.")
             await ctx.send("Skipped⏩", embed=new)
 
     @cog_ext.cog_slash(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
+    async def _slash_resume(self, ctx):
+        await self._resume(ctx)
+
+    @commands.command(name="resume", aliases=["unpause, naruto"], description="Resume the current song.", guild_ids=__GUILD_ID__)
+    async def _reg_resume(self, ctx):
+        await self._resume(ctx)
+
     async def _resume(self, ctx):
         "Resume music"
 
         if ctx.voice_client:
             ctx.voice_client.resume()
-            logger.info(f"{ctx.author} resumed the music")
+            try:
+                logger.info(f"{ctx.author} resumed the music.")
+            except:
+                logger.info(f"{ctx.message.author} resumed the music.")
             await ctx.send("Resumed ▶️")
         else:
             await ctx.send("There isn't anything to resume.")
 
     @cog_ext.cog_slash(name="stop", description="Stop the current song.", guild_ids=__GUILD_ID__)
+    async def _slash_stop(self, ctx):
+        await self._stop(ctx)
+
+    @commands.command(name="stop", aliases=["sasuke"], description="Stop the current song.")
+    async def _reg_stop(self, ctx):
+        await self._stop(ctx)
+
+
     async def _stop(self, ctx):
         "Stop music"
 
         if ctx.voice_client:
             ctx.voice_client.stop()
-            logger.info(f"{ctx.author} stopped the music")
+            try:
+                logger.info(f"{ctx.author} stopped the music.")
+            except:
+                logger.info(f"{ctx.message.author} stopped the music.")
             await ctx.send("Stopped ⏹️")
         else:
             await ctx.send("There isn't anything to stop.")
 
     @cog_ext.cog_slash(name="clear", description="Clear the current queue.", guild_ids=__GUILD_ID__)
+    async def _slash_clear(self, ctx):  
+        await self._clear(ctx)
+
+    @commands.command(name="clear", aliases=["clr"], description="Clear the current queue.")
+    async def _reg_clear(self, ctx):
+        await self._clear(ctx)
+
     async def _clear(self, ctx):
         self.queue.clear()
-        logger.info(f"{ctx.author} cleared the queue")
+        try:
+            logger.info(f"{ctx.author} cleared the queue.")
+        except AttributeError:
+            logger.info(f"{ctx.message.author} cleared the queue.")
         await ctx.send("Queue cleared.")
 
     # queue command
     @cog_ext.cog_slash(name="queue", description="View the current queue.", guild_ids=__GUILD_ID__)
+    async def _slash_queue(self, ctx):
+        await self._queue(ctx)
+
+    @commands.command(name="queue", aliases=["q"], description="View the current queue.")
+    async def _reg_queue(self, ctx):
+        await self._queue(ctx)
+
     async def _queue(self, ctx):
         if len(self.queue) <= 0:
-            await ctx.send("The Queue is empty")
+            await ctx.send("The Queue is empty.")
         else:
             embed = discord.Embed(
                 title="Queue",
@@ -299,7 +386,10 @@ class Music(commands.Cog):
             embed.set_thumbnail(url=self.client.user.avatar_url)
             embed.set_footer(
                 text=f"{len(self.queue)} songs in queue. • use /skip to skip songs")
-            logger.info(f"{ctx.author} requested the queue")
+            try:
+                logger.info(f"{ctx.author} requested the queue")
+            except AttributeError:
+                logger.info(f"{ctx.message.author.name} requested the queue")
             await ctx.send(embed=embed)
 
     # command to get lyrics from genius
@@ -313,6 +403,13 @@ class Music(commands.Cog):
                            )
                        ]
                        )
+    async def _slash_lyric(self, ctx, song):
+        await self._lyrics(ctx, song)
+
+    @commands.command(name="lyrics", aliases=["l"],)
+    async def _reg_lyrics(self, ctx, *, song):
+        await self._lyrics(ctx, song)
+
     async def _lyrics(self, ctx, song):
         # get the song from genius
         try:
@@ -352,12 +449,28 @@ class Music(commands.Cog):
                 title=f"Lyrics for {song.full_title}", description=lyrics, color=discord.Color.from_rgb(3, 252, 252)
             )
             e.set_thumbnail(url=thumbnail)
-            e.set_footer(
+            try:
+                e.set_footer(
                 text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
+            except AttributeError:
+                e.set_footer(
+                text=f"Requested by {ctx.message.author.name} • Artist: {song.artist}")
             logger.info(
                 f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.send(embed=e)
 
+    @Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandNotFound):
+            return
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"error: Missing required argument {error.param.name}")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send(error)
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"Command on cool down. Try again in {error.retry_after}seconds") #we dont even have any cooldowns lmaoo
+        else:
+            await ctx.send(error)
 
 def setup(bot):
     "Setup command for the bot"
