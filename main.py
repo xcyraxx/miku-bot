@@ -11,6 +11,7 @@ import os
 from gc import set_threshold
 import json
 import discord
+import platform
 from discord import guild
 from discord.enums import Status
 from discord.ext import commands
@@ -81,7 +82,12 @@ async def on_guild_join(guild):
     await STDOUT_CHANNEL.send(f"Joined guild `{guild.name}`\nTotal Guilds: {len(client.guilds)}")
     open("utils/guilds.txt", "a").write(f"\n{guild.id}")
     await client.close()
-    os.system("python3 main.py")
+    # Run python main.py if Windows, else python3 main.py
+    # TODO: Use subprocess instead of os.system()
+    if platform.system() == "Windows":
+        os.system("python main.py")
+    else:
+        os.system("python3 main.py")
 
 @client.command()
 async def reload(ctx, module):
