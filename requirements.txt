@@ -1,7 +1,6 @@
 git+https://github.com/Cupcakus/pafy
 discord==1.7.3
 enhanced-dpy==1.7.3.7.post1
-pafy==0.5.5
 replit==3.0.0
 python-dotenv==0.19.0
 validators==0.18.2
