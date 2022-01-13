@@ -11,3 +11,4 @@ requests==2.26.0
 urllib3==1.26.4
 discord-py-slash-command==3.0.1
 discord-py-interactions==3.0.2
+lyricsgenius==3.0.1
