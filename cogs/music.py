@@ -2,7 +2,7 @@
 Music command script for Miku
 
 Main contributors:
-    @savioxavier, @xcyraxx, @UndriveAssassin
+    @savioxavier, @xcyraxx, @UnderdriveAssassin
 """
 
 import datetime as dt
@@ -13,13 +13,13 @@ import urllib.request
 from typing import Text
 
 import discord
-from discord.ext.commands.core import command
 import pafy
 import requests
 import validators
 import youtube_dl
 from discord.ext import commands
 from discord.ext.commands import Cog
+from discord.ext.commands.core import command
 from discord_slash import SlashCommand, SlashContext, cog_ext
 from discord_slash.utils.manage_commands import create_option
 from lyricsgenius import Genius
@@ -136,6 +136,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("I'm not connected to a voice channel.")
     # FIX: Low quality code
+
     @cog_ext.cog_slash(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
     async def _slash_play(self, ctx, song_name: str):
         await self._play(ctx, song_name)
@@ -330,7 +331,6 @@ class Music(commands.Cog):
     async def _reg_stop(self, ctx):
         await self._stop(ctx)
 
-
     async def _stop(self, ctx):
         "Stop music"
 
@@ -345,7 +345,7 @@ class Music(commands.Cog):
             await ctx.send("There isn't anything to stop.")
 
     @cog_ext.cog_slash(name="clear", description="Clear the current queue.", guild_ids=__GUILD_ID__)
-    async def _slash_clear(self, ctx):  
+    async def _slash_clear(self, ctx):
         await self._clear(ctx)
 
     @commands.command(name="clear", aliases=["clr"], description="Clear the current queue.")
@@ -451,10 +451,10 @@ class Music(commands.Cog):
             e.set_thumbnail(url=thumbnail)
             try:
                 e.set_footer(
-                text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
+                    text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
             except AttributeError:
                 e.set_footer(
-                text=f"Requested by {ctx.message.author.name} • Artist: {song.artist}")
+                    text=f"Requested by {ctx.message.author.name} • Artist: {song.artist}")
             logger.info(
                 f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.send(embed=e)
@@ -468,9 +468,11 @@ class Music(commands.Cog):
         elif isinstance(error, commands.BadArgument):
             await ctx.send(error)
         elif isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"Command on cool down. Try again in {error.retry_after}seconds") #we dont even have any cooldowns lmaoo
+            # we dont even have any cooldowns lmaoo
+            await ctx.send(f"Command on cool down. Try again in {error.retry_after}seconds")
         else:
             await ctx.send(error)
+
 
 def setup(bot):
     "Setup command for the bot"

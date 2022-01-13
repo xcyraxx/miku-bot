@@ -2,8 +2,7 @@
 Master script for Miku
 
 Main contributors:
-    @savioxavier, @xcyraxx, @UndriveAssassin
-    Assassin
+    @savioxavier, @xcyraxx, @UnderdriveAssassin
 """
 # ol(
 
@@ -141,6 +140,7 @@ async def _reg_help(ctx):
 @slash.slash(name="help", guild_ids=__GUILD_ID__, description="list all commands.")
 async def _slash_help(ctx):
     await _help(ctx)
+
 
 async def _help(ctx):
     select = create_select(
