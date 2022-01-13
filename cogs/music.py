@@ -142,7 +142,7 @@ class Music(commands.Cog):
         await self._play(ctx, song_name)
 
     @commands.command(name="play", description="Play any song by name", aliases=["p"])
-    async def _reg_play(self, ctx, song_name: str):
+    async def _reg_play(self, ctx, *, song_name: str):
         await self._play(ctx, song_name)
 
     async def _play(self, ctx, song_name):
