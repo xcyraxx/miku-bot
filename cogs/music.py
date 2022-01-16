@@ -8,13 +8,12 @@ Main contributors:
 import datetime as dt
 import os
 import re
+from datetime import timedelta
 import urllib.parse
 import urllib.request
 from typing import Text
 
 import discord
-import pafy
-import requests
 import validators
 import youtube_dl
 from discord.ext import commands
@@ -24,7 +23,6 @@ from discord_slash import SlashCommand, SlashContext, cog_ext
 from discord_slash.utils.manage_commands import create_option
 from lyricsgenius import Genius
 from validators.url import url
-
 from utils import logutil
 
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
@@ -193,24 +191,16 @@ class Music(commands.Cog):
 
                 url = f"http://www.youtube.com/watch?v={search_results[1]}"
 
-                vid = pafy.new(url)
-                brr = vid.title
-                thumb_url = vid.thumb
-                dur = vid.duration
-                auth = ctx.author.mention
-
                 with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
                     if valid:
-                        url3 = song_name
-                        video = pafy.new(url3)
-                        url = url3
-                        thumb_url = video.thumb
-                        brr = video.title
-                        dur = video.duration
-                        auth = ctx.author.mention
+                        url = song_name
 
                     info = ydl.extract_info(url, download=False)
                     url2 = info["formats"][0]["url"]
+                    brr = info["title"]
+                    dur = timedelta(seconds=info["duration"])
+                    thumb_url = info["thumbnail"]
+                    auth = ctx.author.mention
 
                     source = await discord.FFmpegOpusAudio.from_probe(url2, **self.FFMPEG_OPTIONS)
 
@@ -300,7 +290,8 @@ class Music(commands.Cog):
                 color=discord.Color.from_rgb(3, 252, 252))
             new.set_thumbnail(url=thumb_url)
             logger.info(f"{auth} skipped the music.")
-            await ctx.send("Skipped⏩", embed=new)
+            await ctx.send("⏩")
+            await ctx.send(embed=new)
 
     @cog_ext.cog_slash(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
     async def _slash_resume(self, ctx):
@@ -319,7 +310,7 @@ class Music(commands.Cog):
                 logger.info(f"{ctx.author} resumed the music.")
             except:
                 logger.info(f"{ctx.message.author} resumed the music.")
-            await ctx.send("Resumed ▶️")
+            await ctx.send("▶️")
         else:
             await ctx.send("There isn't anything to resume.")
 
@@ -340,7 +331,7 @@ class Music(commands.Cog):
                 logger.info(f"{ctx.author} stopped the music.")
             except:
                 logger.info(f"{ctx.message.author} stopped the music.")
-            await ctx.send("Stopped ⏹️")
+            await ctx.send("⏹️")
         else:
             await ctx.send("There isn't anything to stop.")
 
