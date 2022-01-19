@@ -385,13 +385,17 @@ class Music(commands.Cog):
 
     async def _queue_remove(self, ctx, index: int):
         if index > len(self.queue):
-            await ctx.send("That index is out of range. Try a number between 1 and {len(self.queue)}")
+            await ctx.send(f"That index is out of range. Try a number between 1 and {len(self.queue)}")
         else:
             self.queue.pop(index - 1)
             await ctx.send("Removed song from queue.")
 
     @commands.command(name="remove", aliases=["r", "qr"], description="Remove a song from the queue.")
     async def _reg_remove(self, ctx, index: int):
+        await self._queue_remove(ctx, index)
+
+    @cog_ext.xog_slash(name="remove", description="Remove a song from the queue.", guild_ids=__GUILD_ID__)
+    async def _slash_queue_remove(self, ctx, index: int):
         await self._queue_remove(ctx, index)
 
     # command to get lyrics from genius
