@@ -394,7 +394,7 @@ class Music(commands.Cog):
     async def _reg_remove(self, ctx, index: int):
         await self._queue_remove(ctx, index)
 
-    @cog_ext.xog_slash(name="remove", description="Remove a song from the queue.", guild_ids=__GUILD_ID__)
+    @cog_ext.cog_slash(name="remove", description="Remove a song from the queue.", guild_ids=__GUILD_ID__)
     async def _slash_queue_remove(self, ctx, index: int):
         await self._queue_remove(ctx, index)
 
