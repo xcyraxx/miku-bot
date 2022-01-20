@@ -17,8 +17,7 @@ import discord
 import validators
 import youtube_dl
 from discord.ext import commands
-from discord.ext.commands import Cog
-from discord.ext.commands.core import command
+from discord.ext.commands import Cog, BucketType
 from discord_slash import SlashCommand, SlashContext, cog_ext
 from discord_slash.utils.manage_commands import create_option
 from lyricsgenius import Genius
@@ -139,16 +138,9 @@ class Music(commands.Cog):
         await self._play(ctx, song_name)
 
     @commands.command(name="play", description="Play any song by name", aliases=["p"])
+    @commands.cooldown(1, 5, BucketType.user)
     async def _reg_play(self, ctx, *, song_name: str):
         await self._play(ctx, song_name)
-
-    @_reg_play.error
-    async def _reg_play_error(self, ctx, error):
-        await ctx.send(f"`{error}`")
-
-    @_slash_play.error
-    async def _slash_play_error(self, ctx, error):
-        await ctx.send(f"`{error}`")
 
     async def _play(self, ctx, song_name):
         """Play a YouTube video using the youtube_dl library
@@ -275,13 +267,14 @@ class Music(commands.Cog):
         await self._skip(ctx)
 
     async def _skip(self, ctx):
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-        else:
-            await ctx.send(".-. I'm not playing anything~")
         if len(self.queue) <= 0:
             await ctx.send("The Queue is empty")
         else:
+            if ctx.voice_client.is_playing():
+                ctx.voice_client.stop()
+            else:
+                await ctx.send(".-. I'm not playing anything~")
+                return
             brr = self.queue[0][0]
             dur = self.queue[0][3]
             thumb_url = self.queue[0][2]
@@ -299,6 +292,7 @@ class Music(commands.Cog):
             logger.info(f"{auth} skipped the music.")
             await ctx.send("⏩")
             await ctx.send(embed=new)
+        
 
     @cog_ext.cog_slash(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
     async def _slash_resume(self, ctx):
@@ -413,18 +407,9 @@ class Music(commands.Cog):
     async def _reg_remove(self, ctx, index: str):
         await self._queue_remove(ctx, index)
 
-    @_reg_remove.error
-    async def remove_error(self, ctx, error):
-        await ctx.send(error)
-
     @cog_ext.cog_slash(name="remove", description="Remove a song from the queue.", guild_ids=__GUILD_ID__)
     async def _slash_queue_remove(self, ctx, index: str):
         await self._queue_remove(ctx, index)
-
-    @_slash_queue_remove.error
-    async def slash_remove_error(self, ctx, error):
-        await ctx.send(error)
-
     # command to get lyrics from genius
     @cog_ext.cog_slash(name="lyrics", description="Get the lyrics of a song.", guild_ids=__GUILD_ID__,
                        options=[
@@ -442,14 +427,6 @@ class Music(commands.Cog):
     @commands.command(name="lyrics", aliases=["l"],)
     async def _reg_lyrics(self, ctx, *, song):
         await self._lyrics(ctx, song)
-
-    @_slash_lyric.error
-    async def slash_lyric_error(self, ctx, error):
-        await ctx.send(error)
-
-    @_reg_lyrics.error
-    async def _lyrics_error(self, ctx, error):
-        await ctx.send(error)
 
     async def _lyrics(self, ctx, song):
         # get the song from genius
@@ -505,12 +482,12 @@ class Music(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             return
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"`error: Missing required argument {error.param.name}`")
+            await ctx.send(f"`Error: Missing required argument {error.param.name}`")
         elif isinstance(error, commands.BadArgument):
             await ctx.send(f"`{error}`")
         elif isinstance(error, commands.CommandOnCooldown):
             # we dont even have any cooldowns lmaoo
-            await ctx.send(f"`Error: Command on cool down. Try again in {error.retry_after}seconds`")
+            await ctx.send(f"`Error: Command on cooldown. Try again in {round(error.retry_after, 2)} seconds`")
         else:
             await ctx.send(f"`{error}`")
 

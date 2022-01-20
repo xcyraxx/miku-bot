@@ -163,10 +163,18 @@ async def _help(ctx):
         description="Select Category for commands.",
         color=discord.Color.from_rgb(3, 252, 252))
     await ctx.send(embed=bot_help, components=[action_row])
+    logger.info(f"{ctx.author} requested help.")
 
 @client.command(name="activity", description="Set the bot's activity")
+@commands.is_owner()
 async def _reg_activity(ctx, *, activity=None):
-    await client.change_presence(activity=discord.Game(name=activity))
+    await client.change_presence(activity=discord.Game(name=activity), status=Status.idle)
+    await ctx.send(f"Activity set to {activity}")
+
+@_reg_activity.error
+async def _reg_activity_error(ctx, error):
+    if isinstance(error, commands.MissingRole):
+        await ctx.send("You do not have the required permissions.")
 
 @client.event
 async def on_component(ctx: ComponentContext):
