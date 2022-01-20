@@ -63,7 +63,7 @@ logger.info("""
 ╚═╝░░░░░╚═╝╚═╝╚═╝░░╚═╝░╚═════╝░░░░░░░╚═════╝░░╚════╝░░░░╚═╝░░░
 """)
 
-activity = discord.Game(name=">>help")
+activity = discord.Game(name=">>help • /help")
 client = commands.Bot(command_prefix=determine_prefix,
                       case_insensitive=True,
                       activity=activity,
@@ -117,7 +117,10 @@ MUSIC_HELP = """
     Leave the vc.
 
 **`queue`**:
-    Display the current queue(Is very shit rn, im working on it).
+    Display the current queue.
+
+**`remove`**:
+    Remove a song from the queue.
 
 """
 
@@ -161,6 +164,9 @@ async def _help(ctx):
         color=discord.Color.from_rgb(3, 252, 252))
     await ctx.send(embed=bot_help, components=[action_row])
 
+@client.command(name="activity", description="Set the bot's activity")
+async def _reg_activity(ctx, *, activity=None):
+    await client.change_presence(activity=discord.Game(name=activity))
 
 @client.event
 async def on_component(ctx: ComponentContext):

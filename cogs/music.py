@@ -72,9 +72,8 @@ class Music(commands.Cog):
         if len(self.queue) > 0:
             self.is_playing = True
 
-            self.current_song = self.queue[0]
             source = self.queue[0][1]
-            self.queue.pop(0)
+            self.current_song = self.queue.pop(0)
 
             self.vc.play(source, after=lambda e: self.play_next())
         else:
@@ -142,6 +141,14 @@ class Music(commands.Cog):
     @commands.command(name="play", description="Play any song by name", aliases=["p"])
     async def _reg_play(self, ctx, *, song_name: str):
         await self._play(ctx, song_name)
+
+    @_reg_play.error
+    async def _reg_play_error(self, ctx, error):
+        await ctx.send(f"`{error}`")
+
+    @_slash_play.error
+    async def _slash_play_error(self, ctx, error):
+        await ctx.send(f"`{error}`")
 
     async def _play(self, ctx, song_name):
         """Play a YouTube video using the youtube_dl library
@@ -253,7 +260,7 @@ class Music(commands.Cog):
                     logger.info(f"{ctx.author} paused the music.")
                 except AttributeError:
                     logger.info(f"{ctx.message.author} paused the music.")
-                await ctx.send("Paused ⏸️")
+                await ctx.send("⏸️")
             else:
                 await ctx.send("Nothing is playing")
         else:
@@ -383,20 +390,40 @@ class Music(commands.Cog):
                 logger.info(f"{ctx.message.author.name} requested the queue")
             await ctx.send(embed=embed)
 
-    async def _queue_remove(self, ctx, index: int):
-        if index > len(self.queue):
-            await ctx.send(f"That index is out of range. Try a number between 1 and {len(self.queue)}")
+    async def _queue_remove(self, ctx, index: str):
+        if "-" in str(index):
+            index = index.split("-")
+            if int(index[1]) > len(self.queue):
+                await ctx.send("Invalid index.")
+                return
+            r = 0
+            for i in range(int(index[0]) - 1, int(index[1]) + 1):
+                r +=1 
+                self.queue.pop(i)
+            await ctx.send(f"Removed `{r}`` songs from the queue.")
         else:
-            self.queue.pop(index - 1)
-            await ctx.send("Removed song from queue.")
+            removed = self.queue.pop(int(index) - 1)
+            try:
+                logger.info(f"{ctx.author} removed {removed[0]} from the queue.")
+            except AttributeError:
+                logger.info(f"{ctx.message.author} removed {removed[0]} from the queue.")
+            await ctx.send(f"Removed `{removed[0]}` from the queue.")
 
     @commands.command(name="remove", aliases=["r", "qr"], description="Remove a song from the queue.")
-    async def _reg_remove(self, ctx, index: int):
+    async def _reg_remove(self, ctx, index: str):
         await self._queue_remove(ctx, index)
 
+    @_reg_remove.error
+    async def remove_error(self, ctx, error):
+        await ctx.send(error)
+
     @cog_ext.cog_slash(name="remove", description="Remove a song from the queue.", guild_ids=__GUILD_ID__)
-    async def _slash_queue_remove(self, ctx, index: int):
+    async def _slash_queue_remove(self, ctx, index: str):
         await self._queue_remove(ctx, index)
+
+    @_slash_queue_remove.error
+    async def slash_remove_error(self, ctx, error):
+        await ctx.send(error)
 
     # command to get lyrics from genius
     @cog_ext.cog_slash(name="lyrics", description="Get the lyrics of a song.", guild_ids=__GUILD_ID__,
@@ -415,6 +442,14 @@ class Music(commands.Cog):
     @commands.command(name="lyrics", aliases=["l"],)
     async def _reg_lyrics(self, ctx, *, song):
         await self._lyrics(ctx, song)
+
+    @_slash_lyric.error
+    async def slash_lyric_error(self, ctx, error):
+        await ctx.send(error)
+
+    @_reg_lyrics.error
+    async def _lyrics_error(self, ctx, error):
+        await ctx.send(error)
 
     async def _lyrics(self, ctx, song):
         # get the song from genius
@@ -470,14 +505,14 @@ class Music(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             return
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"error: Missing required argument {error.param.name}")
+            await ctx.send(f"`error: Missing required argument {error.param.name}`")
         elif isinstance(error, commands.BadArgument):
-            await ctx.send(error)
+            await ctx.send(f"`{error}`")
         elif isinstance(error, commands.CommandOnCooldown):
             # we dont even have any cooldowns lmaoo
-            await ctx.send(f"Command on cool down. Try again in {error.retry_after}seconds")
+            await ctx.send(f"`Error: Command on cool down. Try again in {error.retry_after}seconds`")
         else:
-            await ctx.send(error)
+            await ctx.send(f"`{error}`")
 
 
 def setup(bot):
