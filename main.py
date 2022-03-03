@@ -10,11 +10,8 @@ import os
 from gc import set_threshold
 
 import discord
-from discord.enums import Status
 from discord.ext import commands
-from discord.ext.commands import bot
 from discord_slash import SlashCommand
-from discord_slash.model import ButtonStyle
 from discord_slash.utils.manage_components import (ComponentContext,
                                                    create_actionrow,
                                                    create_select,
@@ -28,7 +25,7 @@ load_dotenv()
 
 TOKEN = os.environ.get("TOKEN")
 
-__version__ = "1.3.0"
+__version__ = "2.0"
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
 
 custom_prefixes = {}
@@ -69,7 +66,7 @@ client = commands.Bot(command_prefix=determine_prefix,
                       activity=activity,
                       intents=intents,
                       help_command=None,
-                      status=Status.idle
+                      status=discord.enums.Status.idle
                       )
 slash = SlashCommand(client, sync_commands=True)
 
@@ -80,8 +77,12 @@ async def on_ready():
     logger.info(
         f"Logged in as {client.user.name}#{client.user.discriminator}")
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
-    await STDOUT_CHANNEL.send(f"Prototype {__version__} Online.")
+    await STDOUT_CHANNEL.send(f"Miku {__version__} Online.")
 
+@client.event
+async def on_disconnect():
+    STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
+    await STDOUT_CHANNEL.send(f"Miku {__version__} Offline.")
 
 @client.command()
 @commands.guild_only()
@@ -168,7 +169,7 @@ async def _help(ctx):
 @client.command(name="activity", description="Set the bot's activity")
 @commands.is_owner()
 async def _reg_activity(ctx, *, activity=None):
-    await client.change_presence(activity=discord.Game(name=activity), status=Status.idle)
+    await client.change_presence(activity=discord.Game(name=activity), status=discord.enums.Status.idle)
     await ctx.send(f"Activity set to {activity}")
 
 @_reg_activity.error

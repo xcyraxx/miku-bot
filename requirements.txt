@@ -1,6 +1,6 @@
 
-discord==1.7.3
-enhanced-dpy==1.7.3.7.post1
+git+https://github.com/Rapptz/discord.py.git
+enhanced-dpy==1.7.3.7.post6
 replit==3.0.0
 python-dotenv==0.19.0
 validators==0.18.2
