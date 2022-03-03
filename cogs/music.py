@@ -374,7 +374,7 @@ class Music(commands.Cog):
             logger.info(f"{ctx.message.author} shuffled the queue.")
         await ctx.reply("Queue shuffled.")
 
-    @commands.command(name="shuffle", aliases=["s"], description="Shuffle the queue.")
+    @commands.command(name="shuffle", aliases=[""], description="Shuffle the queue.")
     async def _reg_shuffle(self, ctx):
         await self._shuffle(ctx)
 
