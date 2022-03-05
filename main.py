@@ -63,17 +63,6 @@ async def on_disconnect():
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
     await STDOUT_CHANNEL.send(f"Miku {__version__} Offline.")
 
-@client.command()
-@commands.guild_only()
-async def setprefix(ctx, *, prefixes=""):
-    """Function to change bot prefix from the default
-
-    Args:
-        prefixes (str, optional): Prefix to be used. Defaults to "".
-    """
-    custom_prefixes[ctx.guild.id] = prefixes.split() or default_prefixes
-    await ctx.send("Prefixes set!")
-
 MUSIC_HELP = """
 **`join`**: 
     Connect the bot your current Voice Channel.
