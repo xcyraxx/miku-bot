@@ -54,7 +54,7 @@ class Music(commands.Cog):
         self.current_song = self.queue.pop(0)
 
         self.vc.play(source, after=lambda e: self.play_next())
-        await ctx.send(embed=self.current_song.create_playing())
+        await ctx.send(embed=self.current_song.create_play())
 
     def play_next(self):
         if len(self.queue) > 0:
@@ -366,6 +366,14 @@ class Music(commands.Cog):
                 f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.reply(embed=e, mention_author=False)
 
+    @commands.command(name="shuffle", description="Shuffle the queue.")
+    async def _reg_shuffle(self, ctx):
+        await self._shuffle(ctx)
+
+    @cog_ext.cog_slash(name="shuffle", description="Shuffle the queue.", guild_ids=__GUILD_ID__)
+    async def _slash_shuffle(self, ctx):
+        await self._shuffle(ctx)
+
     async def _shuffle(self, ctx):
         random.shuffle(self.queue)
         try:
@@ -373,14 +381,6 @@ class Music(commands.Cog):
         except AttributeError:
             logger.info(f"{ctx.message.author} shuffled the queue.")
         await ctx.reply("Queue shuffled.")
-
-    @commands.command(name="shuffle", aliases=[""], description="Shuffle the queue.")
-    async def _reg_shuffle(self, ctx):
-        await self._shuffle(ctx)
-
-    @cog_ext.cog_slash(name="shuffle", description="Shuffle the queue.", guild_ids=__GUILD_ID__)
-    async def _slash_shuffle(self, ctx):
-        await self._shuffle(ctx)
 
     @Cog.listener()
     async def on_command_error(self, ctx, error):
