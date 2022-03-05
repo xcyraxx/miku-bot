@@ -3,18 +3,11 @@ Meta commands for the Miku bot
 """
 
 import datetime
+from email.policy import default
 import time
-from typing import Text
 
 import discord
-from discord.enums import ChannelType
 from discord.ext import commands
-from discord.ext.commands.core import guild_only
-from discord_slash import SlashCommand, SlashContext, cog_ext
-from discord_slash.utils.manage_commands import create_option
-from discord_slash.utils.manage_components import (create_actionrow,
-                                                   create_select,
-                                                   create_select_option)
 
 from utils import logutil
 
@@ -22,6 +15,36 @@ __GUILD_ID__ = [846609621429780520, 893122121805496371]
 
 logger = logutil.init()
 
+def get_all_roles(user):
+    "Get all roles for a user"
+
+    roles = ','.join(
+        [f"<@&{role.id}>" for role in user.roles if role.name != "@everyone"]
+    )
+    return roles
+
+"""
+TOO MANY PERMS X
+def get_all_perms(user):
+    perms = []
+    role = user.top_role
+    for name, value in role.permissions:
+        if value:
+            perms.append(name)
+    return perms
+"""
+
+def get_key_perms(user):
+    "Get the key permissions for a user"
+
+    key_perms = ["administrator", "manage_guild", "manage_channels", "kick members", "ban members", "manage_nicknames", "manage_roles", "manage_messages", "attach files", "mention everyone", "manage_webhooks", "manage_emojis"]
+    perms = []
+    role = user.top_role
+    for name, value in role.permissions:
+        if value:
+            if name in key_perms:
+                perms.append(name)
+    return perms
 
 class Meta(commands.Cog):
     "Python class that handles all meta commands"
@@ -39,8 +62,8 @@ class Meta(commands.Cog):
         global startTime
         startTime = time.time()
 
-    @cog_ext.cog_slash(name="botinfo", description="Display info about the bot", guild_ids=__GUILD_ID__)
-    async def command_botinfo(self, ctx: SlashContext):
+    @discord.slash_command(name="botinfo", description="Display info about the bot", guild_ids=__GUILD_ID__)
+    async def command_botinfo(self, ctx):
         "Returns information about the bot"
 
         logger.info(f"{ctx.author} executed botinfo")
@@ -63,10 +86,10 @@ class Meta(commands.Cog):
         uptime = str(datetime.timedelta(
             seconds=int(round(time.time()-startTime))))
         info.add_field(name="Library used",
-                       value="Enhanced Discord.py v1.7.3.7.post1", inline=False)
+                       value="Py-cord", inline=False)
         info.add_field(name="Python Version",
                        value="Python 3.9.6", inline=True)
-        info.add_field(name="Code Lines written", value="492")
+        info.add_field(name="Code Lines written", value="913")
         info.add_field(name="Uptime", value=uptime, inline=False)
         info.add_field(name="Top Role in this Server", value=user.top_role)
         info.add_field(
@@ -74,16 +97,16 @@ class Meta(commands.Cog):
         info.add_field(name="Version", value='1.3.0')
         info.set_footer(text="Avatar drawn by marshadow#7063")
         info.set_thumbnail(url=user.avatar_url)
-        await ctx.send(embed=info)
+        await ctx.respond(embed=info)
 
-    @cog_ext.cog_slash(name="serverinfo", description="Get server info", guild_ids=__GUILD_ID__)
-    async def command_serverinfo(self, ctx: SlashContext):
+    @discord.slash_command(name="serverinfo", description="Get server info", guild_ids=__GUILD_ID__)
+    async def command_serverinfo(self, ctx):
 
         info = discord.Embed(
             color=discord.Color.from_rgb(3, 252, 252)
         )
         info.set_author(
-            name=f"{ctx.guild.name}", icon_url=ctx.guild.icon_url)
+            name=f"{ctx.guild.name}", icon_url=ctx.guild.icon.url)
         info.add_field(
             name="Owner", value=f"{ctx.guild.owner.name}#{ctx.guild.owner.discriminator}", inline=True)
         info.add_field(name="Channel Categories",
@@ -97,23 +120,14 @@ class Meta(commands.Cog):
         info.add_field(name="Bots", value=len(
             [m for m in ctx.guild.members if not m.bot]))
         info.add_field(name="Roles", value=len(ctx.guild.roles))
-        info.add_field(name="Role list", value=", ".join(
-            [str(r.name) for r in ctx.guild.roles]), inline=False)
-        info.set_thumbnail(url=ctx.guild.icon_url)
+        info.set_thumbnail(url=ctx.guild.icon.url)
         info.set_footer(
             text=f'ID: {ctx.guild.id} | Created on {ctx.guild.created_at.strftime("%a, %b %d, %Y %I:%M %p")}')
-        await ctx.send(embed=info)
+        await ctx.respond(embed=info)
 
     # get user's avatar
-    @cog_ext.cog_slash(name="avatar", description="Get user's avatar", guild_ids=__GUILD_ID__,
-                       options=[
-                           create_option(
-                               name="user",
-                               description="Select user to get avatar",
-                               option_type=6,
-                               required=False)
-                       ])
-    async def command_avatar(self, ctx: SlashContext, user=None):
+    @discord.slash_command(name="avatar", description="Get user's avatar", guild_ids=__GUILD_ID__)
+    async def command_avatar(self, ctx, user: discord.User = None):
         "Returns the avatar of the user"
         if user:
             pass
@@ -124,10 +138,40 @@ class Meta(commands.Cog):
             color=discord.Color.from_rgb(3, 252, 252)
         )
         info.set_author(
-            name=f"{user.display_name}#{user.discriminator}", icon_url=user.avatar_url)
-        info.set_image(url=user.avatar_url)
+            name=f"{user.display_name}#{user.discriminator}", icon_url=user.avatar.url)
+        info.set_image(url=user.avatar.url)
         info.set_footer(text=f'ID: {user.id}')
-        await ctx.send(embed=info)
+        await ctx.respond(embed=info)
+
+    @discord.slash_command(name="whois", description="Get user's info", guild_ids=__GUILD_ID__)
+    async def command_whois(self, ctx, user: discord.User = None):
+        "Returns the info of the user"
+        if user:
+            pass
+        else:
+            try:
+                user = ctx.author
+            except AttributeError:
+                user = ctx.author
+        info = discord.Embed(
+            title=f"{user.display_name}'s Info",
+            color=discord.Color.from_rgb(3, 252, 252)
+        )
+        info.set_author(
+            name=f"{user.display_name}#{user.discriminator}", icon_url=user.avatar.url)
+        info.add_field(name="Register on",
+                       value=user.created_at.strftime("%a, %b %d, %Y %I:%M %p"), inline=True)
+        info.add_field(name="Joined on", value=user.joined_at.strftime("%a, %b %d, %Y %I:%M %p"), inline=True)
+        info.add_field(name=f"Roles[{len(user.roles)-1}]", value=get_all_roles(user) , inline=False)
+        info.add_field(name="Key Permissions", value=','.join(
+            f"{perm.capitalize().replace('_', ' ')}" for perm in get_key_perms(user)), inline=False)
+        info.set_footer(text=f'ID: {user.id}')
+        info.set_thumbnail(url=user.avatar.url)
+        await ctx.respond(embed=info)
+
+    @command_whois.error
+    async def command_whois_error(self, ctx, error):
+        logger.error(error)
 
 
 def setup(bot):
