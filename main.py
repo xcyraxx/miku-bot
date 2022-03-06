@@ -6,11 +6,12 @@ Main contributors:
 """
 # ol(
 
+import asyncio
 import os
+
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-import asyncio
 
 from utils import logutil
 
@@ -57,6 +58,7 @@ async def on_ready():
         f"Logged in as {client.user.name}#{client.user.discriminator}")
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
     await STDOUT_CHANNEL.send(f"Miku {__version__} Online.")
+
 
 @client.event
 async def on_disconnect():
@@ -110,6 +112,7 @@ other = discord.Embed(
     description=OTHER_HELP,
     color=discord.Color.from_rgb(3, 252, 252))
 
+
 class DropDown(discord.ui.View):
     @discord.ui.select(
         placeholder="Select a category",
@@ -126,9 +129,12 @@ class DropDown(discord.ui.View):
         else:
             await interaction.response.send_message("Invalid category")
 # help command
+
+
 @client.command(name="help", description="List commands")
 async def _reg_help(ctx):
     await _help(ctx)
+
 
 @client.command(name="test", description="Test command")
 async def _reg_test(ctx):
@@ -150,7 +156,7 @@ async def _help(ctx):
         color=discord.Color.from_rgb(3, 252, 252))
     await ctx.respond(embed=bot_help, view=view)
     logger.info(f"{ctx.author} requested help.")
-    
+
 
 @client.command(name="activity", description="Set the bot's activity")
 @commands.is_owner()
@@ -158,10 +164,12 @@ async def _reg_activity(ctx, *, activity=None):
     await client.change_presence(activity=discord.Game(name=activity), status=discord.enums.Status.idle)
     await ctx.send(f"Activity set to {activity}")
 
+
 @_reg_activity.error
 async def _reg_activity_error(ctx, error):
     if isinstance(error, commands.MissingRole):
         await ctx.send("You do not have the required permissions.")
+
 
 @client.slash_command(name="activity", guild_ids=__GUILD_ID__, description="Set the bot's activity")
 @commands.is_owner()

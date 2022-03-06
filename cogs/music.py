@@ -7,18 +7,14 @@ Main contributors:
 
 
 import os
-from types import NoneType
-from async_timeout import timeout
-import asyncio
-from itsdangerous import exc
-from numpy import random
-from utils import ytutil, logutil
+
 import discord
 from discord.ext import commands
-from discord.ext.commands import Cog, BucketType
+from discord.ext.commands import BucketType, Cog
 from lyricsgenius import Genius
-import itertools
+from numpy import random
 
+from utils import logutil, ytutil
 
 __GUILD_ID__ = [846609621429780520, 893122121805496371]
 PREFIX = os.environ.get("PREFIX")
@@ -301,7 +297,7 @@ class Music(commands.Cog):
         await self._queue_remove(ctx, index)
 
     @discord.slash_command(name="lyrics", description="Get the lyrics of a song.", guild_ids=__GUILD_ID__)
-    async def _slash_lyric(self, ctx, song: str=None):
+    async def _slash_lyric(self, ctx, song: str = None):
         await self._lyrics(ctx, song)
 
     @commands.command(name="lyrics", aliases=["l"],)

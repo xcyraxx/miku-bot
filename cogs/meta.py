@@ -3,7 +3,6 @@ Meta commands for the Miku bot
 """
 
 import datetime
-from email.policy import default
 import time
 
 import discord
@@ -15,6 +14,7 @@ __GUILD_ID__ = [846609621429780520, 893122121805496371]
 
 logger = logutil.init()
 
+
 def get_all_roles(user):
     "Get all roles for a user"
 
@@ -22,6 +22,7 @@ def get_all_roles(user):
         [f"<@&{role.id}>" for role in user.roles if role.name != "@everyone"]
     )
     return roles
+
 
 """
 TOO MANY PERMS X
@@ -34,10 +35,12 @@ def get_all_perms(user):
     return perms
 """
 
+
 def get_key_perms(user):
     "Get the key permissions for a user"
 
-    key_perms = ["administrator", "manage_guild", "manage_channels", "kick members", "ban members", "manage_nicknames", "manage_roles", "manage_messages", "attach files", "mention everyone", "manage_webhooks", "manage_emojis"]
+    key_perms = ["administrator", "manage_guild", "manage_channels", "kick members", "ban members", "manage_nicknames",
+                 "manage_roles", "manage_messages", "attach files", "mention everyone", "manage_webhooks", "manage_emojis"]
     perms = []
     role = user.top_role
     for name, value in role.permissions:
@@ -45,6 +48,7 @@ def get_key_perms(user):
             if name in key_perms:
                 perms.append(name)
     return perms
+
 
 class Meta(commands.Cog):
     "Python class that handles all meta commands"
@@ -161,8 +165,10 @@ class Meta(commands.Cog):
             name=f"{user.display_name}#{user.discriminator}", icon_url=user.avatar.url)
         info.add_field(name="Register on",
                        value=user.created_at.strftime("%a, %b %d, %Y %I:%M %p"), inline=True)
-        info.add_field(name="Joined on", value=user.joined_at.strftime("%a, %b %d, %Y %I:%M %p"), inline=True)
-        info.add_field(name=f"Roles[{len(user.roles)-1}]", value=get_all_roles(user) , inline=False)
+        info.add_field(name="Joined on", value=user.joined_at.strftime(
+            "%a, %b %d, %Y %I:%M %p"), inline=True)
+        info.add_field(name=f"Roles[{len(user.roles)-1}]",
+                       value=get_all_roles(user), inline=False)
         info.add_field(name="Key Permissions", value=','.join(
             f"{perm.capitalize().replace('_', ' ')}" for perm in get_key_perms(user)), inline=False)
         info.set_footer(text=f'ID: {user.id}')

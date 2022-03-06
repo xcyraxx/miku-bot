@@ -2,14 +2,15 @@
 Ytdl utils 
 """
 
-import discord
-import urllib
-import validators
-import youtube_dl
 import re
+import urllib
 from datetime import timedelta
 from typing import Text
-import asyncio
+
+import discord
+import validators
+import youtube_dl
+
 
 class YTDLSource(discord.PCMVolumeTransformer):
     global YTDL_OPTIONS
