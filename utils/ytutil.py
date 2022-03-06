@@ -50,21 +50,24 @@ class Song(object):
         self.requester = requester
 
     def create_play(self):
-        playing = discord.Embed(
-            title="Now Playing",
-            description=f"🎶{self.title}\n`[00:00:00/{self.duration}]`\n\nRequested by: {self.requester.mention}",
-            color=discord.Color.from_rgb(3, 252, 252))
-        playing.set_thumbnail(url=self.thumbnail)
-        return playing
+        return self.create_discord_embed(
+            "Now Playing", '🎶', '\n`[00:00:00/', ']`\n\nRequested by: '
+        )
 
     def create_queue(self):
-        queued = discord.Embed(
-            title="Added to Queue",
-            description=f"**{self.title}**\n`{self.duration}`\nRequested by {self.requester.mention}",
-            color=discord.Color.from_rgb(3, 252, 252)
+        return self.create_discord_embed(
+            "Added to Queue", '**', '**\n`', '`\nRequested by '
         )
-        queued.set_thumbnail(url=self.thumbnail)
-        return queued
+
+    def create_discord_embed(self, title, arg1, arg2, arg3):
+        playing = discord.Embed(
+            title=title,
+            description=f"{arg1}{self.title}{arg2}{self.duration}{arg3}{self.requester.mention}",
+            color=discord.Color.from_rgb(3, 252, 252),
+        )
+
+        playing.set_thumbnail(url=self.thumbnail)
+        return playing
 
 
 def create_search(ctx, song_name):
@@ -86,7 +89,7 @@ async def get_data(song_name, ctx):
     })
 
     htm_content = urllib.request.urlopen(
-        "https://www.youtube.com/results?" + query_string
+        f"https://www.youtube.com/results?{query_string}"
     )
 
     search_results = re.findall(
@@ -105,6 +108,5 @@ async def get_data(song_name, ctx):
         thumbnail_url = info["thumbnail"]
         author = ctx.author
         source = await discord.FFmpegOpusAudio.from_probe(video_url, **FFMPEG_OPTIONS)
-        song = Song(source, title, video_url,
+        return Song(source, title, video_url,
                     duration, thumbnail_url, author)
-        return song

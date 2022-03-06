@@ -4,8 +4,8 @@ Custom logging script
 
 import logging
 
-DEBUG = True
-DEBUG_DISCORD = True
+DEBUG = False
+DEBUG_DISCORD = False
 
 
 def get_logger(name):

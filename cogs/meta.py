@@ -18,10 +18,9 @@ logger = logutil.init()
 def get_all_roles(user):
     "Get all roles for a user"
 
-    roles = ','.join(
+    return ','.join(
         [f"<@&{role.id}>" for role in user.roles if role.name != "@everyone"]
     )
-    return roles
 
 
 """
@@ -39,15 +38,25 @@ def get_all_perms(user):
 def get_key_perms(user):
     "Get the key permissions for a user"
 
-    key_perms = ["administrator", "manage_guild", "manage_channels", "kick members", "ban members", "manage_nicknames",
-                 "manage_roles", "manage_messages", "attach files", "mention everyone", "manage_webhooks", "manage_emojis"]
-    perms = []
     role = user.top_role
-    for name, value in role.permissions:
-        if value:
-            if name in key_perms:
-                perms.append(name)
-    return perms
+    key_perms = [
+        "administrator",
+        "manage_guild",
+        "manage_channels",
+        "kick members",
+        "ban members",
+        "manage_nicknames",
+        "manage_roles",
+        "manage_messages",
+        "attach files",
+        "mention everyone",
+        "manage_webhooks",
+        "manage_emojis",
+    ]
+
+    return [
+        name for name, value in role.permissions if value and name in key_perms
+    ]
 
 
 class Meta(commands.Cog):
@@ -133,9 +142,7 @@ class Meta(commands.Cog):
     @discord.slash_command(name="avatar", description="Get user's avatar", guild_ids=__GUILD_ID__)
     async def command_avatar(self, ctx, user: discord.User = None):
         "Returns the avatar of the user"
-        if user:
-            pass
-        else:
+        if not user:
             user = ctx.author
         info = discord.Embed(
             title=f"{user.display_name}'s Avatar",
@@ -150,9 +157,7 @@ class Meta(commands.Cog):
     @discord.slash_command(name="whois", description="Get user's info", guild_ids=__GUILD_ID__)
     async def command_whois(self, ctx, user: discord.User = None):
         "Returns the info of the user"
-        if user:
-            pass
-        else:
+        if not user:
             try:
                 user = ctx.author
             except AttributeError:

@@ -193,10 +193,9 @@ else:
 # dynamically load all cogs found in cogs/ as cog extensions
 for module in command_modules:
     try:
-        client.load_extension("cogs." + module)
+        client.load_extension(f"cogs.{module}")
     except Exception as e:
         logger.info(f"Could not import cog {module}: \n{e}")
-
 logger.info(f"Cogs imported: {', '.join(command_modules)}")
 
 client.run(TOKEN)
