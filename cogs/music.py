@@ -63,11 +63,17 @@ class Music(commands.Cog):
         else:
             self.is_playing = False
 
-    @discord.slash_command(name="join", description="Join your current voice channel", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="join",
+        description="Join your current voice channel",
+        guild_ids=__GUILD_ID__,
+    )
     async def _slash_join(self, ctx):
         await self._join(ctx)
 
-    @commands.command(name="join", aliases=["j"], help="Join your current voice channel")
+    @commands.command(
+        name="join", aliases=["j"], help="Join your current voice channel"
+    )
     async def _reg_join(self, ctx):
         "Join your current voice channel"
         await self._join(ctx)
@@ -90,11 +96,12 @@ class Music(commands.Cog):
             await ctx.respond(f"`Connected to `<#{auth.voice.channel.id}>")
         else:
             self.vc = await ctx.voice_client.move_to(auth.voice.channel)
-            logger.info(
-                f"{auth} made Miku switch to {auth.voice.channel}")
+            logger.info(f"{auth} made Miku switch to {auth.voice.channel}")
             await ctx.respond(f"`Switched to `<#{auth.voice.channel.id}>")
 
-    @discord.slash_command(name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="leave", description="Disconnects the bot.", guild_ids=__GUILD_ID__
+    )
     async def _slash_leave(self, ctx):
         "Leave a voice if the bot is connected to a Voice Channel, else raise error if it isn't"
 
@@ -114,9 +121,12 @@ class Music(commands.Cog):
             await ctx.respond("Disconnected from Voice Channel.")
         else:
             await ctx.respond("I'm not connected to a voice channel.")
+
     # FIX: Low quality code
 
-    @discord.slash_command(name="play", description="Play any song by name", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="play", description="Play any song by name", guild_ids=__GUILD_ID__
+    )
     async def _slash_play(self, ctx, song_name: str):
         await self._play(ctx, song_name)
 
@@ -143,7 +153,9 @@ class Music(commands.Cog):
         else:
             await search_embed.edit(embed=song.create_queue())
 
-    @discord.slash_command(name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="pause", description="Pause the current song.", guild_ids=__GUILD_ID__
+    )
     async def _slash_pause(self, ctx):
         await self._pause(ctx)
 
@@ -166,7 +178,9 @@ class Music(commands.Cog):
         else:
             await ctx.respond("I'm not connected to a voice channel.")
 
-    @discord.slash_command(name="skip", description="Skips the current song.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="skip", description="Skips the current song.", guild_ids=__GUILD_ID__
+    )
     async def _slash_skip(self, ctx):
         await self._skip(ctx)
 
@@ -187,11 +201,18 @@ class Music(commands.Cog):
             await self.play_music(ctx)
             await ctx.respond("⏩")
 
-    @discord.slash_command(name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="resume", description="Resume the current song.", guild_ids=__GUILD_ID__
+    )
     async def _slash_resume(self, ctx):
         await self._resume(ctx)
 
-    @commands.command(name="resume", aliases=["unpause, naruto"], description="Resume the current song.", guild_ids=__GUILD_ID__)
+    @commands.command(
+        name="resume",
+        aliases=["unpause, naruto"],
+        description="Resume the current song.",
+        guild_ids=__GUILD_ID__,
+    )
     async def _reg_resume(self, ctx):
         await self._resume(ctx)
 
@@ -208,11 +229,15 @@ class Music(commands.Cog):
         else:
             await ctx.respond("There isn't anything to resume.")
 
-    @discord.slash_command(name="stop", description="Stop the current song.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="stop", description="Stop the current song.", guild_ids=__GUILD_ID__
+    )
     async def _slash_stop(self, ctx):
         await self._stop(ctx)
 
-    @commands.command(name="stop", aliases=["sasuke"], description="Stop the current song.")
+    @commands.command(
+        name="stop", aliases=["sasuke"], description="Stop the current song."
+    )
     async def _reg_stop(self, ctx):
         await self._stop(ctx)
 
@@ -229,11 +254,15 @@ class Music(commands.Cog):
         else:
             await ctx.respond("There isn't anything to stop.")
 
-    @discord.slash_command(name="clear", description="Clear the current queue.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="clear", description="Clear the current queue.", guild_ids=__GUILD_ID__
+    )
     async def _slash_clear(self, ctx):
         await self._clear(ctx)
 
-    @commands.command(name="clear", aliases=["clr"], description="Clear the current queue.")
+    @commands.command(
+        name="clear", aliases=["clr"], description="Clear the current queue."
+    )
     async def _reg_clear(self, ctx):
         await self._clear(ctx)
 
@@ -246,11 +275,15 @@ class Music(commands.Cog):
         await ctx.respond("Queue cleared.")
 
     # queue command
-    @discord.slash_command(name="queue", description="View the current queue.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="queue", description="View the current queue.", guild_ids=__GUILD_ID__
+    )
     async def _slash_queue(self, ctx):
         await self._queue(ctx)
 
-    @commands.command(name="queue", aliases=["q"], description="View the current queue.")
+    @commands.command(
+        name="queue", aliases=["q"], description="View the current queue."
+    )
     async def _reg_queue(self, ctx):
         await self._queue(ctx)
 
@@ -259,18 +292,23 @@ class Music(commands.Cog):
             await ctx.respond("The Queue is empty.")
         else:
             upnext = "\n".join(
-                [f"`{i + 1}.` [{song.title}]({song.url}) `[{song.duration}]`" for i,
-                 song in enumerate(self.queue)]
+                [
+                    f"`{i + 1}.` [{song.title}]({song.url}) `[{song.duration}]`"
+                    for i, song in enumerate(self.queue)
+                ]
             )
             embed = discord.Embed(
-                title="Queue",
-                color=discord.Color.from_rgb(3, 252, 252)
+                title="Queue", color=discord.Color.from_rgb(3, 252, 252)
             )
             embed.add_field(
-                name="Current", value=f"[{self.current_song.title}]({self.current_song.url}) `[{self.current_song.duration}]`", inline=False)
+                name="Current",
+                value=f"[{self.current_song.title}]({self.current_song.url}) `[{self.current_song.duration}]`",
+                inline=False,
+            )
             embed.set_thumbnail(url=self.client.user.avatar_url)
-            embed.set_footer(text=f"{len(self.queue)} songs in queue. • use /skip to skip songs") if len(
-                self.queue) > 1 else embed.set_footer(text="1 song in queue.")
+            embed.set_footer(
+                text=f"{len(self.queue)} songs in queue. • use /skip to skip songs"
+            ) if len(self.queue) > 1 else embed.set_footer(text="1 song in queue.")
             embed.add_field(name="Up next", value=upnext)
             await ctx.respond(embed=embed)
             try:
@@ -281,26 +319,35 @@ class Music(commands.Cog):
     async def _queue_remove(self, ctx, index: str):
         removed = self.queue.pop(int(index) - 1)
         try:
-            logger.info(
-                f"{ctx.author} removed {removed.name} from the queue.")
+            logger.info(f"{ctx.author} removed {removed.name} from the queue.")
         except AttributeError:
-            logger.info(
-                f"{ctx.message.author} removed {removed[0]} from the queue.")
+            logger.info(f"{ctx.message.author} removed {removed[0]} from the queue.")
         await ctx.respond(f"Removed `{removed.name}` from the queue.")
 
-    @commands.command(name="remove", aliases=["r", "qr"], description="Remove a song from the queue.")
+    @commands.command(
+        name="remove", aliases=["r", "qr"], description="Remove a song from the queue."
+    )
     async def _reg_remove(self, ctx, index: str):
         await self._queue_remove(ctx, index)
 
-    @discord.slash_command(name="remove", description="Remove a song from the queue.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="remove",
+        description="Remove a song from the queue.",
+        guild_ids=__GUILD_ID__,
+    )
     async def _slash_queue_remove(self, ctx, index: str):
         await self._queue_remove(ctx, index)
 
-    @discord.slash_command(name="lyrics", description="Get the lyrics of a song.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="lyrics", description="Get the lyrics of a song.", guild_ids=__GUILD_ID__
+    )
     async def _slash_lyric(self, ctx, song: str = None):
         await self._lyrics(ctx, song)
 
-    @commands.command(name="lyrics", aliases=["l"],)
+    @commands.command(
+        name="lyrics",
+        aliases=["l"],
+    )
     async def _reg_lyrics(self, ctx, *, song=None):
         await self._lyrics(ctx, song)
 
@@ -323,38 +370,43 @@ class Music(commands.Cog):
         lyrics = song.lyrics.replace("EmbedShare URLCopyEmbedCopy", "")
         thumbnail = song.song_art_image_url
         if len(lyrics) > 2000:
-            s1 = lyrics[:len(lyrics)//2]
+            s1 = lyrics[: len(lyrics) // 2]
             embed = discord.Embed(
                 title=f"Lyrics for {song.full_title}",
                 description=f"{s1}\n\n[Full lyrics here]({song.url})",
-                color=discord.Color.from_rgb(3, 252, 252)
+                color=discord.Color.from_rgb(3, 252, 252),
             )
             embed.set_thumbnail(url=thumbnail)
             embed.set_footer(
-                text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
-            logger.info(
-                f"{ctx.author} requested the lyrics for '{song.full_title}'")
+                text=f"Requested by {ctx.author.name} • Artist: {song.artist}"
+            )
+            logger.info(f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.respond(embed=embed)
         else:
             e = discord.Embed(
-                title=f"Lyrics for {song.full_title}", description=lyrics, color=discord.Color.from_rgb(3, 252, 252)
+                title=f"Lyrics for {song.full_title}",
+                description=lyrics,
+                color=discord.Color.from_rgb(3, 252, 252),
             )
             e.set_thumbnail(url=thumbnail)
             try:
                 e.set_footer(
-                    text=f"Requested by {ctx.author.name} • Artist: {song.artist}")
+                    text=f"Requested by {ctx.author.name} • Artist: {song.artist}"
+                )
             except AttributeError:
                 e.set_footer(
-                    text=f"Requested by {ctx.message.author.name} • Artist: {song.artist}")
-            logger.info(
-                f"{ctx.author} requested the lyrics for '{song.full_title}'")
+                    text=f"Requested by {ctx.message.author.name} • Artist: {song.artist}"
+                )
+            logger.info(f"{ctx.author} requested the lyrics for '{song.full_title}'")
             await ctx.respond(embed=e)
 
     @commands.command(name="shuffle", description="Shuffle the queue.")
     async def _reg_shuffle(self, ctx):
         await self._shuffle(ctx)
 
-    @discord.slash_command(name="shuffle", description="Shuffle the queue.", guild_ids=__GUILD_ID__)
+    @discord.slash_command(
+        name="shuffle", description="Shuffle the queue.", guild_ids=__GUILD_ID__
+    )
     async def _slash_shuffle(self, ctx):
         await self._shuffle(ctx)
 
@@ -376,7 +428,9 @@ class Music(commands.Cog):
             await ctx.respond(f"`{error}`")
         elif isinstance(error, commands.commandOnCooldown):
             # we dont even have any cooldowns lmaoo
-            await ctx.respond(f"`Error: Command on cooldown. Try again in {round(error.retry_after, 2)} seconds`")
+            await ctx.respond(
+                f"`Error: Command on cooldown. Try again in {round(error.retry_after, 2)} seconds`"
+            )
         else:
             await ctx.respond(f"`{error}`")
             logger.error(f"{ctx.author} caused an error: {error}")

@@ -15,24 +15,24 @@ import youtube_dl
 class YTDLSource(discord.PCMVolumeTransformer):
     global YTDL_OPTIONS
     YTDL_OPTIONS = {
-        'format': 'bestaudio/best',
-        'extractaudio': True,
-        'audioformat': 'mp3',
-        'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-        'restrictfilenames': True,
-        'noplaylist': True,
-        'nocheckcertificate': True,
-        'ignoreerrors': False,
-        'logtostderr': False,
-        'quiet': True,
-        'no_warnings': True,
-        'default_search': 'auto',
-        'source_address': '0.0.0.0',
+        "format": "bestaudio/best",
+        "extractaudio": True,
+        "audioformat": "mp3",
+        "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
+        "restrictfilenames": True,
+        "noplaylist": True,
+        "nocheckcertificate": True,
+        "ignoreerrors": False,
+        "logtostderr": False,
+        "quiet": True,
+        "no_warnings": True,
+        "default_search": "auto",
+        "source_address": "0.0.0.0",
     }
     global FFMPEG_OPTIONS
     FFMPEG_OPTIONS = {
-        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-        'options': '-vn',
+        "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+        "options": "-vn",
     }
     global ytdl
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
@@ -41,7 +41,15 @@ class YTDLSource(discord.PCMVolumeTransformer):
 class Song(object):
     "Song object"
 
-    def __init__(self, source, title: Text, url: Text, duration: Text, thumbnail: Text, requester: Text):
+    def __init__(
+        self,
+        source,
+        title: Text,
+        url: Text,
+        duration: Text,
+        thumbnail: Text,
+        requester: Text,
+    ):
         self.source = source
         self.title = title
         self.url = url
@@ -51,12 +59,12 @@ class Song(object):
 
     def create_play(self):
         return self.create_ytutil_discord_embed(
-            "Now Playing", '🎶', '\n`[00:00:00/', ']`\n\nRequested by: '
+            "Now Playing", "🎶", "\n`[00:00:00/", "]`\n\nRequested by: "
         )
 
     def create_queue(self):
         return self.create_ytutil_discord_embed(
-            "Added to Queue", '**', '**\n`', '`\nRequested by '
+            "Added to Queue", "**", "**\n`", "`\nRequested by "
         )
 
     def create_ytutil_discord_embed(self, title, arg1, arg2, arg3):
@@ -76,24 +84,25 @@ def create_search(ctx, song_name):
     except AttributeError:
         auth = ctx.message.author
     searching = discord.Embed(
-        title="Searching", description=f"{song_name}\n\nRequested by: "+auth.mention, color=discord.Color.from_rgb(3, 252, 252))
+        title="Searching",
+        description=f"{song_name}\n\nRequested by: " + auth.mention,
+        color=discord.Color.from_rgb(3, 252, 252),
+    )
     searching.set_thumbnail(
-        url="https://media.discordapp.net/attachments/884694080708300831/899203305140518962/mikuload.gif?width=469&height=469")
+        url="https://media.discordapp.net/attachments/884694080708300831/899203305140518962/mikuload.gif?width=469&height=469"
+    )
     return searching
 
 
 async def get_data(song_name, ctx):
 
-    query_string = urllib.parse.urlencode({
-        "search_query": song_name
-    })
+    query_string = urllib.parse.urlencode({"search_query": song_name})
 
     htm_content = urllib.request.urlopen(
         f"https://www.youtube.com/results?{query_string}"
     )
 
-    search_results = re.findall(
-        r"watch\?v=(\S{11})", htm_content.read().decode())
+    search_results = re.findall(r"watch\?v=(\S{11})", htm_content.read().decode())
 
     search_url = f"http://www.youtube.com/watch?v={search_results[1]}"
     valid = validators.url(song_name)
@@ -108,5 +117,4 @@ async def get_data(song_name, ctx):
         thumbnail_url = info["thumbnail"]
         author = ctx.author
         source = await discord.FFmpegOpusAudio.from_probe(video_url, **FFMPEG_OPTIONS)
-        return Song(source, title, video_url,
-                    duration, thumbnail_url, author)
+        return Song(source, title, video_url, duration, thumbnail_url, author)

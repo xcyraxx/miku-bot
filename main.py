@@ -29,9 +29,11 @@ intents.members = True
 logger = logutil.init()
 
 logger.warning(
-    f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}")
+    f"Debug Mode is {logutil.DEBUG}. discord.py Debug Mode is {logutil.DEBUG_DISCORD}"
+)
 
-logger.info("""
+logger.info(
+    """
 
 ███╗░░░███╗██╗██╗░░██╗██╗░░░██╗░░░░░░██████╗░░█████╗░████████╗
 ████╗░████║██║██║░██╔╝██║░░░██║░░░░░░██╔══██╗██╔══██╗╚══██╔══╝
@@ -39,23 +41,24 @@ logger.info("""
 ██║╚██╔╝██║██║██╔═██╗░██║░░░██║╚════╝██╔══██╗██║░░██║░░░██║░░░
 ██║░╚═╝░██║██║██║░╚██╗╚██████╔╝░░░░░░██████╦╝╚█████╔╝░░░██║░░░
 ╚═╝░░░░░╚═╝╚═╝╚═╝░░╚═╝░╚═════╝░░░░░░░╚═════╝░░╚════╝░░░░╚═╝░░░
-""")
+"""
+)
 
 activity = discord.Game(name=">>help • /help")
-client = commands.Bot(command_prefix=">>",
-                      case_insensitive=True,
-                      activity=activity,
-                      intents=intents,
-                      help_command=None,
-                      status=discord.enums.Status.idle
-                      )
+client = commands.Bot(
+    command_prefix=">>",
+    case_insensitive=True,
+    activity=activity,
+    intents=intents,
+    help_command=None,
+    status=discord.enums.Status.idle,
+)
 
 
 @client.event
 async def on_ready():
     "Function to determine what commands are to be if bot is connected to Discord"
-    logger.info(
-        f"Logged in as {client.user.name}#{client.user.discriminator}")
+    logger.info(f"Logged in as {client.user.name}#{client.user.discriminator}")
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
     await STDOUT_CHANNEL.send(f"Miku {__version__} Online.")
 
@@ -64,6 +67,7 @@ async def on_ready():
 async def on_disconnect():
     STDOUT_CHANNEL = await client.fetch_channel(885979416369438751)
     await STDOUT_CHANNEL.send(f"Miku {__version__} Offline.")
+
 
 MUSIC_HELP = """
 **`join`**: 
@@ -97,7 +101,8 @@ MUSIC_HELP = """
 music = discord.Embed(
     title="Miku Music Help",
     description=MUSIC_HELP,
-    color=discord.Color.from_rgb(3, 252, 252))
+    color=discord.Color.from_rgb(3, 252, 252),
+)
 
 OTHER_HELP = """
 **`botinfo`**: 
@@ -110,7 +115,8 @@ OTHER_HELP = """
 other = discord.Embed(
     title="Miku Other Help",
     description=OTHER_HELP,
-    color=discord.Color.from_rgb(3, 252, 252))
+    color=discord.Color.from_rgb(3, 252, 252),
+)
 
 
 class DropDown(discord.ui.View):
@@ -119,7 +125,7 @@ class DropDown(discord.ui.View):
         options=[
             discord.SelectOption(label="Music", value="music", emoji="🎵"),
             discord.SelectOption(label="Other", value="other", emoji="🔧"),
-        ]
+        ],
     )
     async def callback(self, select, interaction: discord.Interaction):
         if select.values[0] == "music":
@@ -128,6 +134,8 @@ class DropDown(discord.ui.View):
             await interaction.response.edit_message(embed=other)
         else:
             await interaction.response.send_message("Invalid category")
+
+
 # help command
 
 
@@ -143,7 +151,9 @@ async def _reg_test(ctx):
     await msg.edit(content="Test command edited")
 
 
-@client.slash_command(name="help", guild_ids=__GUILD_ID__, description="list all commands.")
+@client.slash_command(
+    name="help", guild_ids=__GUILD_ID__, description="list all commands."
+)
 async def _slash_help(ctx):
     await _help(ctx)
 
@@ -153,7 +163,8 @@ async def _help(ctx):
     bot_help = discord.Embed(
         title="Miku Help",
         description="Select Category for commands.",
-        color=discord.Color.from_rgb(3, 252, 252))
+        color=discord.Color.from_rgb(3, 252, 252),
+    )
     await ctx.respond(embed=bot_help, view=view)
     logger.info(f"{ctx.author} requested help.")
 
@@ -161,7 +172,9 @@ async def _help(ctx):
 @client.command(name="activity", description="Set the bot's activity")
 @commands.is_owner()
 async def _reg_activity(ctx, *, activity=None):
-    await client.change_presence(activity=discord.Game(name=activity), status=discord.enums.Status.idle)
+    await client.change_presence(
+        activity=discord.Game(name=activity), status=discord.enums.Status.idle
+    )
     await ctx.send(f"Activity set to {activity}")
 
 
@@ -171,11 +184,16 @@ async def _reg_activity_error(ctx, error):
         await ctx.send("You do not have the required permissions.")
 
 
-@client.slash_command(name="activity", guild_ids=__GUILD_ID__, description="Set the bot's activity")
+@client.slash_command(
+    name="activity", guild_ids=__GUILD_ID__, description="Set the bot's activity"
+)
 @commands.is_owner()
 async def _slash_activity(ctx, *, activity=None):
-    await client.change_presence(activity=discord.Game(name=activity), status=discord.enums.Status.idle)
+    await client.change_presence(
+        activity=discord.Game(name=activity), status=discord.enums.Status.idle
+    )
     await ctx.respond(f"Activity set to {activity}")
+
 
 command_modules = [
     module[:-3]
@@ -185,8 +203,7 @@ command_modules = [
 
 if command_modules:
     logger.info("Importing cogs. Please stand by...")
-    logger.info(
-        f"Importing {len(command_modules)} cogs: {', '.join(command_modules)}")
+    logger.info(f"Importing {len(command_modules)} cogs: {', '.join(command_modules)}")
 else:
     logger.info("Could not import any cogs!")
 

@@ -41,21 +41,39 @@ class CustomFormatter(logging.Formatter):
     reset = "\x1B[0m"
 
     format = "[%(asctime)s][%(levelname)-7s][%(name)-14s][%(lineno)4s] %(message)s"
-    FORMATS = {
-        logging.DEBUG: green + f"{reset}[%(asctime)s]{green}[%(levelname)-7s][%(name)-14s]{reset}[{red}%(lineno)4s{reset}] %(message)s" + reset,
-        logging.INFO: green + f"{green}[%(asctime)s]{green}[%(levelname)-7s][%(name)-14s]{reset}[{red}%(lineno)4s{reset}] %(message)s" + reset,
-        logging.WARNING: yellow + f"[%(asctime)s][%(levelname)-7s][%(name)-14s][{red}%(lineno)4s{reset}{yellow}] %(message)s" + reset,
-        logging.ERROR: red + "[%(asctime)s][%(levelname)-7s][%(name)-14s][%(lineno)4s] %(message)s" + reset,
-        logging.CRITICAL: red +
-        "[%(asctime)s][%(levelname)-7s][%(name)-14s][%(lineno)4s] %(message)s" + reset
-    } if DEBUG else {
-        logging.DEBUG: reset,
-        logging.INFO: green + "[%(asctime)s][%(levelname)7s]" + reset + " %(message)s" + reset,
-        logging.WARNING: yellow + "[%(asctime)s][%(levelname)7s] %(message)s" + reset,
-        logging.ERROR: red + "[%(asctime)s][%(levelname)7s] %(message)s" + reset,
-        logging.CRITICAL: red +
-        "[%(asctime)s][%(levelname)7s] %(message)s" + reset
-    }
+    FORMATS = (
+        {
+            logging.DEBUG: green
+            + f"{reset}[%(asctime)s]{green}[%(levelname)-7s][%(name)-14s]{reset}[{red}%(lineno)4s{reset}] %(message)s"
+            + reset,
+            logging.INFO: green
+            + f"{green}[%(asctime)s]{green}[%(levelname)-7s][%(name)-14s]{reset}[{red}%(lineno)4s{reset}] %(message)s"
+            + reset,
+            logging.WARNING: yellow
+            + f"[%(asctime)s][%(levelname)-7s][%(name)-14s][{red}%(lineno)4s{reset}{yellow}] %(message)s"
+            + reset,
+            logging.ERROR: red
+            + "[%(asctime)s][%(levelname)-7s][%(name)-14s][%(lineno)4s] %(message)s"
+            + reset,
+            logging.CRITICAL: red
+            + "[%(asctime)s][%(levelname)-7s][%(name)-14s][%(lineno)4s] %(message)s"
+            + reset,
+        }
+        if DEBUG
+        else {
+            logging.DEBUG: reset,
+            logging.INFO: green
+            + "[%(asctime)s][%(levelname)7s]"
+            + reset
+            + " %(message)s"
+            + reset,
+            logging.WARNING: yellow
+            + "[%(asctime)s][%(levelname)7s] %(message)s"
+            + reset,
+            logging.ERROR: red + "[%(asctime)s][%(levelname)7s] %(message)s" + reset,
+            logging.CRITICAL: red + "[%(asctime)s][%(levelname)7s] %(message)s" + reset,
+        }
+    )
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
