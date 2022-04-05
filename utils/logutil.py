@@ -13,8 +13,6 @@ def get_logger(name):
     Useful for modules that have already initialized a logger, such as discord.py
     """
 
-    # Variables prefixed with __ are private
-
     __logger = logging.getLogger(name)
     __logger.setLevel(logging.DEBUG if DEBUG_DISCORD else logging.INFO)
     __ch = logging.StreamHandler()
@@ -25,8 +23,6 @@ def get_logger(name):
 
 def init(name="root"):
     """Function to create a designated logger for separate modules"""
-
-    # Variables prefixed with __ are private
 
     __logger = logging.Logger(name)
     __ch = logging.StreamHandler()

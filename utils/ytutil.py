@@ -50,16 +50,16 @@ class Song(object):
         self.requester = requester
 
     def create_play(self):
-        return self.create_discord_embed(
+        return self.create_ytutil_discord_embed(
             "Now Playing", '🎶', '\n`[00:00:00/', ']`\n\nRequested by: '
         )
 
     def create_queue(self):
-        return self.create_discord_embed(
+        return self.create_ytutil_discord_embed(
             "Added to Queue", '**', '**\n`', '`\nRequested by '
         )
 
-    def create_discord_embed(self, title, arg1, arg2, arg3):
+    def create_ytutil_discord_embed(self, title, arg1, arg2, arg3):
         playing = discord.Embed(
             title=title,
             description=f"{arg1}{self.title}{arg2}{self.duration}{arg3}{self.requester.mention}",
